@@ -86,6 +86,8 @@ class LiveApplication:
         self.training = TrainingJob()
         self.playing, self.speed = False, 3
         self.stats = {'episodes': 0, 'successes': 0}
+        self._execution_samples, self._execution_total_us = 0, 0.0
+        self._last_execution_us = None
         self._counted_episode = None
         self._previous = None
         self._applied_candidate = None
@@ -139,17 +141,32 @@ class LiveApplication:
         frame['engine_sequence'] = frame['sequence']
         frame['sequence'] = self._revision
         training = deepcopy(self._training_snapshot)
+        compatible = (training.get('source_digest') == frame['model']['digest']
+                      and training.get('task_delay') == self.session.delay
+                      and training.get('task_family', 'straight') == frame['settings']['task_family'])
+        training['compatible'] = compatible
+        training['can_apply'] = bool(training.get('can_apply') and compatible)
+        if isinstance(training.get('candidate'), dict):
+            training['candidate']['can_apply'] = training['can_apply']
         frame.update(playing=self.playing, speed=self.speed,
                      checkpoints=[{k: entry[k] for k in ('id', 'label', 'protocol', 'seed')}
                                   for entry in self._catalog.values()],
                      selected_checkpoint=self.selected_checkpoint,
                      training=training, stats=dict(self.stats),
-                     can_rollback=self._previous is not None, runtime_error=self._runtime_error)
+                     can_rollback=self._previous is not None, runtime_error=self._runtime_error,
+                     execution_profile=dict(samples=self._execution_samples,
+                         last_paired_tick_us=self._last_execution_us,
+                         mean_paired_tick_us=self._execution_total_us / self._execution_samples if self._execution_samples else None,
+                         scope='Observed wall time for paired session execution including telemetry; not isolated model inference.'))
         self._frame = frame
         self._condition.notify_all()
 
     def _step(self):
+        started = time.perf_counter_ns()
         frame = self.session.step()
+        self._last_execution_us = (time.perf_counter_ns() - started) / 1000
+        self._execution_samples += 1
+        self._execution_total_us += self._last_execution_us
         identity = (frame['episode'], frame['seed'])
         if frame['done'] and identity != self._counted_episode:
             self.stats['episodes'] += 1
@@ -235,18 +252,19 @@ class LiveApplication:
                 if output_root.is_relative_to(self.study_dir):
                     raise ValueError('training output must be outside the recorded study')
                 self.training.start(self.session.model, updates=updates, output_root=output_root,
-                                    delay=self.session.snapshot()['settings']['delay'])
+                                    delay=self.session.delay, task_family=self.session.settings['task_family'])
                 self.playing = False
             elif action == 'apply':
                 if training.get('status') != 'ready' or not self.training.can_apply or self.training.candidate_model is None:
                     raise ValueError('candidate is not ready or did not pass the retention gate')
                 digest = self.session.model.state_digest()
-                if training.get('source_digest') != digest or training.get('task_delay') != self.session.delay:
-                    raise ValueError('candidate is stale for the active model or task delay')
+                if (training.get('source_digest') != digest or training.get('task_delay') != self.session.delay
+                        or training.get('task_family', 'straight') != self.session.settings['task_family']):
+                    raise ValueError('candidate is stale for the active model, task family or task delay')
                 candidate_digest = self.training.candidate_model.state_digest()
                 if candidate_digest == self._applied_candidate:
                     raise ValueError('candidate has already been applied')
-                before = (self.session.model, deepcopy(self.session.snapshot()['provenance']), self.selected_checkpoint)
+                before = self._model_checkpoint()
                 provenance = {'kind': 'session_adapted', 'label': 'Session adapted · exploratory',
                               'protocol': self.training.candidate_model.protocol,
                               'source_checkpoint': self.selected_checkpoint,
@@ -257,23 +275,31 @@ class LiveApplication:
             elif action == 'rollback':
                 if self._previous is None:
                     raise ValueError('no previous model is available')
-                model, provenance, selected = self._previous
-                self.session.replace_model(model, provenance=provenance)
+                model, provenance, selected, report = self._previous
+                self.session.replace_model(model, provenance=provenance, structural_report=report)
                 self.selected_checkpoint, self._previous = selected, None
                 self.playing = False
             elif action == 'lesion':
                 pair = payload.get('region_pair')
                 if not isinstance(pair, (list, tuple)) or len(pair) != 2:
                     raise ValueError('region_pair must be a 2-element list [src, dst]')
+                before = self._model_checkpoint()
                 self.session.lesion_links([tuple(pair)])
+                self._previous = before
                 self.playing = False
             elif action == 'rewire':
+                before = self._model_checkpoint()
                 self.session.rewire_hebbian()
+                self._previous = before
                 self.playing = False
             self._training_snapshot = self.training.snapshot()
             self._runtime_error = None
             self._publish()
             return deepcopy(self._frame)
+
+    def _model_checkpoint(self):
+        return (self.session.model, self.session.provenance, self.selected_checkpoint,
+                deepcopy(self.session._structural_report))
 
     def export(self):
         with self._lock:

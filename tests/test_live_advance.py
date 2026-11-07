@@ -57,6 +57,7 @@ def test_live_session_structural_plasticity():
     assert step_frame['tick'] == 1
 
     # Trigger Hebbian structural rewiring
+    session.step()
     session.rewire_hebbian()
     post_rewire = session.snapshot()
     assert 'hebbian' in post_rewire['model']['digest'] or post_rewire['sequence'] > 0
@@ -85,6 +86,8 @@ def test_live_application_lesion_and_rewire(tmp_path):
         assert len(lesioned['topology']['links']) == len(initial_frame['topology']['links']) - 1
 
         # Rewire via control API
+        app.control({'action': 'step'})
+        app.control({'action': 'step'})
         rewired = app.control({'action': 'rewire'})
         assert rewired['tick'] == 0
 

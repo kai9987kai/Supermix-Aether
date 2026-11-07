@@ -7,3 +7,11 @@
 
 .branch-results{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:8px 24px 0;color:var(--teal);font:9px var(--mono);line-height:1.7}.branch-results>span{color:var(--amber)}.packet-stat small{display:block;color:var(--muted);font:8px var(--mono);margin-top:6px}@media(max-width:800px){.branch-results{margin-left:16px;margin-right:16px;font-size:8px}}
 
+
+.transfer-panel { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--line, #29424e); }
+.transfer-matrix { overflow-x: auto; }
+.transfer-matrix table { border-collapse: collapse; width: 100%; font-size: 12px; line-height: 1.6; }
+.transfer-matrix caption { text-align: left; color: #94aab8; margin-bottom: 12px; font-size: 11px; }
+.transfer-matrix th, .transfer-matrix td { text-align: left; padding: 10px 12px 10px 0; border-bottom: 1px solid #29424e; white-space: nowrap; }
+.transfer-matrix th { color: #94aab8; font-weight: 500; }
+#plasticity-note { line-height: 1.7; }

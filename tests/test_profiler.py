@@ -1,5 +1,6 @@
 import pytest
 import torch
+from dataclasses import replace
 
 from aether.config import ModelConfig
 from aether.kernel.runtime import TissueModel
@@ -97,3 +98,55 @@ def test_runtime_resource_metrics_integration():
 
     p = model.profile(warmup_steps=1, benchmark_steps=2)
     assert p.protocol == 'wave'
+
+
+@pytest.mark.parametrize('protocol,expected', [('scalar', 189), ('vector', 431),
+                                               ('attention', 495)])
+def test_flop_estimate_counts_executed_dense_pooling_and_pooled_readout(protocol, expected):
+    # Four neurons, two per region, state width two: the decoder runs once
+    # after readout pooling; both auxiliary pooling calls are dense matmuls.
+    config = ModelConfig(neuron_count=4, scalar_edges=4, region_count=2,
+                         region_message_edges=2, state_dimension=2, mode_count=1,
+                         complex_dimensions=1)
+    model = TissueModel(config, protocol, seed=1)
+    assert count_step_flops(model) == expected
+    assert count_step_flops(model, batch_size=3) == 3 * expected - 2 * (4 + (2 if protocol != 'scalar' else 0))
+
+
+@pytest.mark.parametrize('kwargs', [{'benchmark_steps': 0}, {'benchmark_steps': True},
+                                    {'warmup_steps': -1}, {'batch_size': 0}])
+def test_invalid_profile_workloads_are_rejected_without_changing_mode(kwargs):
+    model = TissueModel(small_config(), 'wave', seed=1)
+    model.train()
+    with pytest.raises(ValueError):
+        profile_model(model, **kwargs)
+    assert model.training
+
+
+def test_profile_labels_estimates_and_workload():
+    model = TissueModel(small_config(), 'wave', seed=1).double()
+    profile = profile_model(model, warmup_steps=0, benchmark_steps=2, batch_size=2)
+    details = profile.to_dict()
+    assert details['workload']['batch_size'] == 2
+    assert details['workload']['dtype'] == 'torch.float64'
+    assert details['workload']['model_config'] == model.config.to_dict()
+    assert details['activation_memory_method'] == 'analytical_estimate_not_measured_peak'
+    assert details['flops_method'] == 'analytical_estimate_v2'
+    assert profile.optimizer_state_bytes == 2 * profile.parameter_bytes
+
+
+def test_comparability_rejects_missing_invalid_and_mismatched_workloads():
+    candidate = profile_model(TissueModel(small_config(), 'wave', seed=1),
+                              warmup_steps=0, benchmark_steps=2)
+    baseline = replace(candidate, protocol='vector')
+    assert not verify_resource_comparability(candidate, {})['comparable']
+    assert not verify_resource_comparability(candidate, {'wave': candidate})['comparable']
+    for invalid in (replace(candidate, latency_mean_us=float('nan')),
+                    replace(candidate, latency_p95_us=float('inf')),
+                    replace(candidate, benchmark_samples=0),
+                    replace(candidate, flops_per_step=-1)):
+        assert not verify_resource_comparability(invalid, {'vector': baseline})['comparable']
+    mismatched = replace(baseline, workload={**baseline.workload, 'batch_size': 2})
+    assert not verify_resource_comparability(candidate, {'vector': mismatched})['comparable']
+    missing_metadata = replace(baseline, workload={})
+    assert not verify_resource_comparability(candidate, {'vector': missing_metadata})['comparable']

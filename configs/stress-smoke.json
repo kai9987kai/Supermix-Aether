@@ -1,0 +1,23 @@
+{
+  "seeds": [11],
+  "protocols": ["scalar", "wave"],
+  "task_family": "distraction",
+  "updates": 2,
+  "batch_size": 2,
+  "evaluation_episodes": 4,
+  "learning_rate": 0.003,
+  "delay": 3,
+  "horizon": 9,
+  "retention_delay": 5,
+  "retention_margin": 0.05,
+  "min_confirmatory_seeds": 30,
+  "model": {
+    "neuron_count": 16,
+    "scalar_edges": 32,
+    "region_count": 4,
+    "region_message_edges": 8,
+    "state_dimension": 4,
+    "mode_count": 2,
+    "complex_dimensions": 2
+  }
+}

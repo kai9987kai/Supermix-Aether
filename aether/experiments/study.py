@@ -7,7 +7,6 @@ from numbers import Integral
 from pathlib import Path
 import platform
 import time
-import zipfile
 
 import numpy as np
 import scipy
@@ -15,9 +14,9 @@ import torch
 from torch.nn import functional as F
 
 from aether.config import ModelConfig
-from aether.environments.navigation import NavigationWorld, expert_batch
+from aether.environments.stress import TASK_FAMILIES, create_world, stress_expert_batch
 from aether.evidence.promotion import promotion_decision
-from aether.evidence.receipts import source_fingerprint, write_receipt
+from aether.evidence.receipts import write_receipt, write_source_snapshot
 from aether.evidence.statistics import paired_summary
 from aether.kernel.runtime import TissueModel
 from aether.kernel.conformance import check_transport_conformance
@@ -41,6 +40,7 @@ class StudyConfig:
     retention_margin: float = 0.05
     min_confirmatory_seeds: int = 30
     model: dict = field(default_factory=dict)
+    task_family: str = 'straight'
 
     def __post_init__(self):
         for key in ('updates', 'batch_size', 'evaluation_episodes', 'delay', 'horizon',
@@ -69,6 +69,10 @@ class StudyConfig:
             raise ValueError('retention_margin must be finite in [0,1]')
         if self.retention_delay <= self.delay or self.horizon < self.delay + 2:
             raise ValueError('retention delay must exceed support delay; horizon must permit goal completion')
+        if self.task_family not in TASK_FAMILIES:
+            raise ValueError(f'task_family must be one of {TASK_FAMILIES}')
+        # Validate the selected world's horizon before creating a run directory.
+        create_world(self.task_family, seed=0, delay=self.delay, horizon=self.horizon)
         if self.updates * self.batch_size >= 100_000:
             raise ValueError('support episode budget exceeds disjoint seed block')
         if self.evaluation_episodes >= 1000:
@@ -89,14 +93,15 @@ def episode_seeds(seed: int, count: int, retention: bool = False) -> list[int]:
 
 
 def evaluate(model: TissueModel, seeds: list[int], *, delay: int, horizon: int,
-             intervention: str = 'none', disturbance_seed: int = 0) -> dict:
+             intervention: str = 'none', disturbance_seed: int = 0,
+             task_family: str = 'straight') -> dict:
     digest = model.state_digest()
     was_training = model.training
     model.eval()
     records = []
     with torch.no_grad():
         for episode_seed in seeds:
-            world = NavigationWorld(seed=episode_seed, delay=delay, horizon=horizon)
+            world = create_world(task_family, seed=episode_seed, delay=delay, horizon=horizon)
             state = model.initial_state(1)
             actions, total_reward = [], 0.0
             while not world.done:
@@ -134,7 +139,8 @@ def train_one(config: StudyConfig, protocol: str, seed: int, output: Path) -> di
         # Each seed owns a nonoverlapping support block well below query blocks.
         support_seeds = [seed * 100_000 + update * config.batch_size + i
                          for i in range(config.batch_size)]
-        batch = expert_batch(support_seeds, delay=config.delay, horizon=config.horizon)
+        batch = stress_expert_batch(support_seeds, task_family=config.task_family,
+                                    delay=config.delay, horizon=config.horizon)
         observation = torch.from_numpy(batch['observations'])
         targets = torch.from_numpy(batch['actions'])
         mask = torch.from_numpy(batch['mask'])
@@ -153,16 +159,18 @@ def train_one(config: StudyConfig, protocol: str, seed: int, output: Path) -> di
     train_seconds = time.perf_counter() - started
     trained_digest = model.state_digest()
     evaluation = evaluate(model, episode_seeds(seed, config.evaluation_episodes),
-                          delay=config.delay, horizon=config.horizon)
+                          delay=config.delay, horizon=config.horizon, task_family=config.task_family)
     retention_horizon = config.horizon + config.retention_delay - config.delay
     retention = evaluate(model, episode_seeds(seed, config.evaluation_episodes, retention=True),
-                         delay=config.retention_delay, horizon=retention_horizon)
+                         delay=config.retention_delay, horizon=retention_horizon,
+                         task_family=config.task_family)
     interventions = {}
     if protocol == 'wave':
         for name in INTERVENTIONS:
             interventions[name] = evaluate(model, episode_seeds(seed, config.evaluation_episodes),
                                             delay=config.delay, horizon=config.horizon,
-                                            intervention=name, disturbance_seed=seed + 91_000)
+                                            intervention=name, disturbance_seed=seed + 91_000,
+                                            task_family=config.task_family)
     filename = f'checkpoints/{protocol}-{seed}.pt'
     (output / 'checkpoints').mkdir(exist_ok=True)
     checkpoint = {'schema': 'aether.checkpoint.v1', 'model_config': asdict(model.config),
@@ -172,6 +180,7 @@ def train_one(config: StudyConfig, protocol: str, seed: int, output: Path) -> di
                   'delay': config.delay, 'horizon': config.horizon,
                   'retention_delay': config.retention_delay,
                   'retention_horizon': retention_horizon,
+                  'task_family': config.task_family,
                   'intervention_disturbance_seed': seed + 91_000}
     torch.save(checkpoint, output / filename)
     replay = replay_checkpoint(output / filename)
@@ -195,14 +204,17 @@ def replay_checkpoint(path: Path) -> dict:
         raise ValueError('unsupported checkpoint schema')
     model = TissueModel(ModelConfig(**saved['model_config']), saved['protocol'], saved['seed'])
     model.load_state_dict(saved['state_dict'], strict=True)
+    task_family = saved.get('task_family', 'straight')
     evaluation = evaluate(model, saved['evaluation']['episode_seeds'],
-                          delay=saved['delay'], horizon=saved['horizon'])
+                          delay=saved['delay'], horizon=saved['horizon'], task_family=task_family)
     retention = evaluate(model, saved['retention']['episode_seeds'],
-                         delay=saved['retention_delay'], horizon=saved['retention_horizon'])
+                         delay=saved['retention_delay'], horizon=saved['retention_horizon'],
+                         task_family=task_family)
     interventions = {name: evaluate(model, outcome['episode_seeds'],
                                     delay=saved['delay'], horizon=saved['horizon'],
                                     intervention=name,
-                                    disturbance_seed=saved['intervention_disturbance_seed'])
+                                    disturbance_seed=saved['intervention_disturbance_seed'],
+                                    task_family=task_family)
                      for name, outcome in saved['interventions'].items()}
     expected_names = set(INTERVENTIONS) if saved['protocol'] == 'wave' else set()
     valid = (evaluation == saved['evaluation'] and retention == saved['retention']
@@ -220,21 +232,13 @@ def run_study(config: StudyConfig, output: Path, progress=None) -> dict:
     torch.use_deterministic_algorithms(True)
     write_json(output / 'config.json', asdict(config))
     source_root = Path(__file__).resolve().parents[2]
-    metadata = {'source_fingerprint': source_fingerprint(source_root),
+    # Snapshot and fingerprint share one allowlist and the exact archived bytes.
+    fingerprint = write_source_snapshot(source_root, output / 'source-snapshot.zip')
+    metadata = {'source_fingerprint': fingerprint,
                 'environment': {'python': platform.python_version(), 'platform': platform.platform(),
                                 'torch': str(torch.__version__), 'numpy': np.__version__,
                                 'scipy': scipy.__version__, 'torch_threads': 1},
                 'reproducibility_scope': 'exact local replay on recorded software and hardware'}
-    # Preserve the code that generated this run, even if the working tree moves.
-    with zipfile.ZipFile(output / 'source-snapshot.zip', 'x', compression=zipfile.ZIP_DEFLATED) as archive:
-        for directory in ('aether', 'configs', 'docs', 'tests'):
-            for path in sorted((source_root / directory).rglob('*')):
-                if path.is_file() and path.suffix in ('.py', '.json', '.md', '.toml') and '__pycache__' not in path.parts:
-                    archive.write(path, path.relative_to(source_root).as_posix())
-        for filename in ('pyproject.toml', 'README.md'):
-            path = source_root / filename
-            if path.is_file():
-                archive.write(path, filename)
     runs = []
     for seed in config.seeds:
         for protocol in config.protocols:
@@ -267,6 +271,13 @@ def run_study(config: StudyConfig, output: Path, progress=None) -> dict:
                           'parameter_count': by_protocol[name][0]['parameter_count'],
                           'mean_train_seconds': float(np.mean([r['train_seconds'] for r in by_protocol[name]]))}
                   for name in config.protocols}
+    task_limitations = {
+        'straight': 'Disjoint query seeds draw from the same six fixed goal tasks; there are no held-out geometries.',
+        'distraction': ('Disjoint query seeds resample six fixed goals with seeded sensory distractors; '
+                        'there are no held-out geometries or demonstrated phase-filtering advantage.'),
+        'waypoint': ('Disjoint query seeds resample 30 fixed ordered direction pairs; the second direction '
+                     'is cued again after the first waypoint. There are no held-out route families.'),
+    }
     result = {'schema': 'aether.study.v1', 'status': 'exploratory', 'metadata': metadata,
               'config': asdict(config), 'runs': runs, 'aggregates': aggregates,
               'paired_effects': {name: paired_summary(*pair) for name, pair in comparisons.items()},
@@ -274,7 +285,7 @@ def run_study(config: StudyConfig, output: Path, progress=None) -> dict:
               'limitations': ['Synthetic delayed-cue imitation task, not reinforcement learning or general intelligence.',
                               'Training examples and update counts are matched; measured compute is not established equivalent.',
                               'Packet-reference impairments are separately tested; this training study uses clean tensor transport.',
-                              'Disjoint query seeds draw from the same six fixed goal tasks; there are no held-out geometries.',
+                              task_limitations[config.task_family],
                               'Longer-delay evaluation is a retention proxy, not a sequential catastrophic-forgetting study.']}
     write_json(output / 'results.json', result)
     from aether.observatory import render_report

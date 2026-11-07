@@ -5,7 +5,8 @@ discrete contract, preserving exact deterministic reproducibility per seed.
 """
 
 from copy import deepcopy
-from numbers import Integral
+import math
+from numbers import Integral, Real
 import numpy as np
 
 from aether.environments.navigation import MOVES, NavigationWorld
@@ -25,8 +26,9 @@ class DistractionNavigationWorld(NavigationWorld):
                  distance: int = 2, radius: int = 3,
                  distractor_amplitude: float = 0.75):
         super().__init__(seed=seed, delay=delay, horizon=horizon, distance=distance, radius=radius)
-        if not 0.0 <= distractor_amplitude <= 2.0:
-            raise ValueError('distractor_amplitude must be in [0, 2]')
+        if (isinstance(distractor_amplitude, bool) or not isinstance(distractor_amplitude, Real)
+                or not math.isfinite(distractor_amplitude) or not 0.0 <= distractor_amplitude <= 2.0):
+            raise ValueError('distractor_amplitude must be a finite number in [0, 2]')
         self.distractor_amplitude = float(distractor_amplitude)
         # Deterministic distractor schedule per seed
         rng = np.random.default_rng(seed + 54321)
@@ -54,8 +56,10 @@ class DistractionNavigationWorld(NavigationWorld):
 class WaypointNavigationWorld:
     """Sequential 3D waypoint navigation.
 
-    Requires visiting waypoint 1 before navigating to waypoint 2.
-    Tests multi-mode concurrent carrier memory.
+    Requires visiting waypoint 1 before navigating to waypoint 2. Both route
+    directions appear in the initial cue. After waypoint 1, a weaker secondary
+    direction cue remains visible; this is a staged-route diagnostic, not a
+    fully hidden two-goal memory task.
     """
 
     def __init__(self, seed: int, delay: int = 3, horizon: int = 12,
@@ -93,7 +97,7 @@ class WaypointNavigationWorld:
             observation[self.dir1] = 1.0
             observation[self.dir2] = 0.5
         elif self.visited_waypoint1:
-            # Confirm stage 1 reached
+            # A visible secondary direction cue accompanies the second stage.
             observation[self.dir2] = 0.25
 
         observation[6:9] = self.position / self.radius
@@ -111,13 +115,14 @@ class WaypointNavigationWorld:
         if self.timestep >= self.delay:
             self.position = np.clip(self.position + MOVES[action], -self.radius, self.radius)
 
-        if not self.visited_waypoint1 and np.array_equal(self.position, self.waypoint1):
+        reached_waypoint1 = not self.visited_waypoint1 and np.array_equal(self.position, self.waypoint1)
+        if reached_waypoint1:
             self.visited_waypoint1 = True
 
         self.timestep += 1
         self.success = self.visited_waypoint1 and bool(np.array_equal(self.position, self.waypoint2))
         self.done = self.success or self.timestep >= self.horizon
-        reward = 1.0 if self.success else (0.3 if self.visited_waypoint1 else -0.01)
+        reward = 1.0 if self.success else (0.3 if reached_waypoint1 else -0.01)
         return self.observe(), reward, self.done
 
     def expert_action(self) -> int:

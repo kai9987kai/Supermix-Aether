@@ -12,6 +12,7 @@ from pathlib import Path, PurePosixPath, PureWindowsPath
 import platform
 import re
 import sys
+import zipfile
 
 
 _RECEIPT = "receipt.json"
@@ -76,14 +77,9 @@ def _artifact_paths(root):
     return sorted(paths, key=lambda path: path.relative_to(root).as_posix())
 
 
-def source_fingerprint(root):
-    """Stable SHA256 over relative paths and bytes in the source allowlist.
-
-    Includes aether/, configs/, docs/, tests/ and explicit project root files.
-    Excludes generated outputs, caches, build directories and linked paths.
-    """
-    root = Path(root).resolve(strict=True)
-    manifest = []
+def _source_paths(root):
+    """One source allowlist shared by fingerprints and preserved snapshots."""
+    paths = []
     for directory, dirs, files in os.walk(root, followlinks=False):
         current = Path(directory)
         dirs[:] = sorted(name for name in dirs if name not in _EXCLUDED
@@ -97,8 +93,38 @@ def source_fingerprint(root):
                 continue
             if ((current == root and name in _SOURCE_ROOT_FILES)
                     or (relative.parts[0] in _SOURCE_DIRS and path.suffix in _SOURCE_SUFFIXES)):
-                manifest.append({"path": relative.as_posix(), "sha256": _sha256(path)})
+                paths.append(path)
+    return sorted(paths, key=lambda path: path.relative_to(root).as_posix())
+
+
+def source_fingerprint(root):
+    """Stable SHA256 over relative paths and bytes in the source allowlist.
+
+    Includes aether/, configs/, docs/, tests/ and explicit project root files.
+    Excludes generated outputs, caches, build directories and linked paths.
+    """
+    root = Path(root).resolve(strict=True)
+    manifest = [{"path": path.relative_to(root).as_posix(), "sha256": _sha256(path)}
+                for path in _source_paths(root)]
     return hashlib.sha256(_canonical(sorted(manifest, key=lambda x: x["path"])).encode("utf-8")).hexdigest()
+
+
+def write_source_snapshot(root, destination):
+    """Preserve the complete fingerprint allowlist and return its fingerprint.
+
+    Hash the exact bytes written to the archive, so provenance describes the
+    preserved source even if a source file changes while the study is starting.
+    The archive is created exclusively and never replaces an existing snapshot.
+    """
+    root = Path(root).resolve(strict=True)
+    manifest = []
+    with zipfile.ZipFile(destination, 'x', compression=zipfile.ZIP_DEFLATED) as archive:
+        for path in _source_paths(root):
+            relative = path.relative_to(root).as_posix()
+            content = path.read_bytes()
+            archive.writestr(relative, content)
+            manifest.append({"path": relative, "sha256": hashlib.sha256(content).hexdigest()})
+    return hashlib.sha256(_canonical(manifest).encode('utf-8')).hexdigest()
 
 
 def _environment():

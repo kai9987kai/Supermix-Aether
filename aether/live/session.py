@@ -6,6 +6,7 @@ environment's observation, which exposes its goal cue at tick zero.
 """
 from collections import deque
 from copy import deepcopy
+from dataclasses import asdict
 
 import numpy as np
 import torch
@@ -31,6 +32,7 @@ class LiveSession:
         self.provenance_epoch = 0
         self._trace = deque(maxlen=512)
         self._trace_total = 0
+        self._structural_report = None
         self._describe_model()
         self._restart()
 
@@ -92,6 +94,7 @@ class LiveSession:
         self.candidate_channel = PacketChannel(seed=self.seed, **channel_settings)
         self.control_channel = PacketChannel(seed=self.seed)
         self._history = deque(maxlen=512)
+        self._activity_history = deque(maxlen=512)
         self._effective_differences = self._waiting_differences = 0
         self._branches = {name: self._initial_branch() for name in ('candidate', 'control')}
         self._cache_frame()
@@ -107,8 +110,28 @@ class LiveSession:
             surviving_payload_bytes=0, delivered_payload_bytes=0,
             telemetry_tick=None)
 
+    @staticmethod
+    def _task_info(world):
+        info = dict(radius=world.radius, horizon=world.horizon,
+                    stage=1, waypoints=[world.goal.tolist()])
+        if hasattr(world, 'waypoint1'):
+            info.update(stage=2 if world.visited_waypoint1 else 1,
+                        waypoints=[world.waypoint1.tolist(), world.waypoint2.tolist()],
+                        visited_waypoint1=world.visited_waypoint1)
+        info['sensory_cue'] = world.observe()[:6].tolist()
+        return info
+
     def _cache_frame(self):
         candidate, control = self._branches['candidate'], self._branches['control']
+        for name, branch in self._branches.items():
+            world = getattr(self, name + '_world')
+            branch.update(goal=world.goal.tolist(), task=self._task_info(world))
+        family = self._settings['task_family']
+        boundary = {
+            'straight': 'Policy receives the initial directional cue only at tick zero.',
+            'distraction': 'Policy receives the true cue at tick zero and false sensory pulses during the waiting delay.',
+            'waypoint': 'Policy receives two weighted cues at tick zero and a secondary cue after reaching waypoint one.',
+        }[family]
         self._frame = dict(schema='aether.live.frame.v1', sequence=self.sequence,
             episode=self.episode, seed=self.seed,
             tick=max(self.candidate_world.timestep, self.control_world.timestep),
@@ -116,6 +139,11 @@ class LiveSession:
             settings=deepcopy(self._settings), provenance=deepcopy(self._provenance),
             provenance_epoch=self.provenance_epoch, model=deepcopy(self._model_info),
             topology={'links': deepcopy(self._links)},
+            task=dict(family=family, **self._task_info(self.candidate_world)),
+            plasticity=dict(**deepcopy(self._structural_report or {}),
+                observed_ticks_available=len(self._activity_history),
+                can_rewire=self.model.protocol != 'scalar' and len(self._activity_history) >= 2 and bool(self._links),
+                comparison_scope='Structural edits affect the shared model in both branches; the clean control isolates channel interventions.'),
             candidate=deepcopy(candidate), control=deepcopy(control),
             comparison=dict(effective_action_differences=self._effective_differences,
                 waiting_action_differences=self._waiting_differences,
@@ -123,7 +151,7 @@ class LiveSession:
                 return_delta=candidate['return'] - control['return']),
             history=list(self._history),
             payload_accounting='FP16 payload only: attempted before bandwidth, admitted before loss, surviving after loss, delivered after latency; excludes headers/scalar route. Link/mode energy is mean square of receiver-input packets.',
-            observation_boundary='Goal is spectator metadata; policy receives initial cue only through NavigationWorld.observe().')
+            observation_boundary='Goal coordinates are spectator metadata. ' + boundary)
 
     def snapshot(self):
         return deepcopy(self._frame)
@@ -155,32 +183,48 @@ class LiveSession:
 
     def lesion_links(self, severed_pairs):
         from aether.neurofabric.plasticity import lesion_region_links, reconcile_model_topology
-        new_top = lesion_region_links(self.model.topology, severed_pairs)
-        reconcile_model_topology(self.model, new_top)
-        self._describe_model()
-        return self.reset()
+        if self.model.protocol == 'scalar':
+            raise ValueError('scalar protocol has no auxiliary regional links')
+        existing = {tuple(link) for link in self._links}
+        if (not isinstance(severed_pairs, (list, tuple)) or not severed_pairs
+                or any(not isinstance(pair, (list, tuple)) or len(pair) != 2
+                       or any(type(value) is not int for value in pair)
+                       or tuple(pair) not in existing for pair in severed_pairs)
+                or len({tuple(pair) for pair in severed_pairs}) != len(severed_pairs)):
+            raise ValueError('lesion requires unique existing directed region links')
+        replacement = self._copy_model(self.model)
+        new_top = lesion_region_links(replacement.topology, severed_pairs)
+        reconcile_model_topology(replacement, new_top)
+        report = dict(operation='lesion', region_links_pruned=len(severed_pairs),
+                      region_links_added=0, severed_links=list(map(list, severed_pairs)))
+        return self._replace_structural(replacement, report)
 
     def rewire_hebbian(self):
         from aether.neurofabric.plasticity import HebbianPlasticityEngine
+        if self.model.protocol == 'scalar':
+            raise ValueError('scalar protocol has no auxiliary regional links')
+        if len(self._activity_history) < 2:
+            raise ValueError('rewiring requires at least two executed activity ticks in the current episode')
         engine = HebbianPlasticityEngine(pruning_percentile=50.0, rewiring_budget=2)
-        # Gather regional activity history if available, else synthetic baseline
-        activity = []
-        for step in self._history:
-            cand = step.get('candidate_regions', [])
-            if cand:
-                activity.append([r['activity'] for r in cand])
-        if len(activity) < 2:
-            activity = np.random.default_rng(self.seed).standard_normal((10, self.model.config.region_count))
-        else:
-            activity = np.array(activity)
-        engine.adapt_region_links(self.model, activity)
-        self._describe_model()
-        return self.reset()
+        activity = np.asarray(self._activity_history, dtype=np.float64)
+        replacement = self._copy_model(self.model)
+        report = asdict(engine.adapt_region_links(replacement, activity))
+        report.update(operation='rewire', activity_source='executed_regional_activity',
+                      observed_ticks=len(activity), episode_seed=self.seed,
+                      task_family=self._settings['task_family'])
+        return self._replace_structural(replacement, report)
 
-    def replace_model(self, model, provenance=None):
+    def _replace_structural(self, replacement, report):
+        provenance = dict(self.provenance, kind='structurally_adapted',
+                          label='Structural adaptation · exploratory',
+                          source_digest=self.model.state_digest(), operation=report['operation'])
+        return self.replace_model(replacement, provenance, structural_report=report)
+
+    def replace_model(self, model, provenance=None, *, structural_report=None):
         replacement = self._copy_model(model)
         copied_provenance = deepcopy(provenance or {'kind': 'session-adapted'})
         self.model, self._provenance = replacement, copied_provenance
+        self._structural_report = deepcopy(structural_report)
         self.provenance_epoch += 1
         self._trace.clear()
         self._trace_total = 0
@@ -231,6 +275,8 @@ class LiveSession:
             else:
                 self._waiting_differences += 1
         self.sequence += 1
+        if action is not None:
+            self._activity_history.append([row['activity'] for row in self._branches['candidate']['regions']])
         self._history.append(dict(tick=max(self.candidate_world.timestep, self.control_world.timestep),
             action=action, control_action=control_action, movement_enabled=movement_enabled,
             reward=reward, control_reward=control_reward,

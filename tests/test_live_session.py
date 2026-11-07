@@ -156,3 +156,59 @@ def test_waiting_disagreements_are_not_counted_as_effective_actions():
     assert frame['history'][-1]['movement_enabled'] is False
     assert frame['comparison']['waiting_action_differences'] == int(
         frame['candidate']['action'] != frame['control']['action'])
+
+
+def test_rewire_requires_executed_activity_and_records_its_source():
+    live = session()
+    original = live.snapshot()
+    with pytest.raises(ValueError, match='two executed'):
+        live.rewire_hebbian()
+    assert live.snapshot() == original
+    live.step()
+    with pytest.raises(ValueError, match='two executed'):
+        live.rewire_hebbian()
+    live.step()
+    before = live.model.state_digest()
+    updated = live.rewire_hebbian()
+    assert updated['plasticity']['activity_source'] == 'executed_regional_activity'
+    assert updated['plasticity']['observed_ticks'] == 2
+    assert updated['provenance_epoch'] == original['provenance_epoch'] + 1
+    assert updated['provenance']['source_digest'] == before
+    assert updated['plasticity']['observed_ticks_available'] == 0
+    assert updated['tick'] == 0
+    # Validation and cloning must agree about all re-derived buffers.
+    from aether.live.models import clone_model
+    assert clone_model(live.model).state_digest() == live.model.state_digest()
+
+
+def test_structural_edits_have_provenance_and_reject_unknown_links_atomically():
+    live = session()
+    before = live.snapshot()
+    with pytest.raises(ValueError):
+        live.lesion_links([[True, 2]])
+    assert live.snapshot() == before
+    link = before['topology']['links'][0]
+    after = live.lesion_links([link])
+    assert after['provenance']['kind'] == 'structurally_adapted'
+    assert after['plasticity']['operation'] == 'lesion'
+    assert after['plasticity']['region_links_pruned'] == 1
+    assert after['provenance_epoch'] == 1
+    with pytest.raises(ValueError, match='existing'):
+        live.lesion_links([link])
+    assert live.snapshot() == after
+
+
+def test_waypoint_telemetry_tracks_actual_stage_and_goal():
+    live = session()
+    live.configure(task_family='waypoint')
+    assert live.snapshot()['task']['radius'] == 4
+    for name in ('candidate', 'control'):
+        world = getattr(live, name + '_world')
+        world.position = world.waypoint1.copy()
+        world.visited_waypoint1 = True
+        world.timestep = live.delay
+    frame = live.step()
+    assert frame['candidate']['goal'] == live.candidate_world.goal.tolist()
+    assert frame['candidate']['task']['stage'] == 2
+    assert len(frame['candidate']['task']['waypoints']) == 2
+    assert 'secondary cue' in frame['observation_boundary']

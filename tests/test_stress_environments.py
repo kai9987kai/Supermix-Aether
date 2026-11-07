@@ -90,6 +90,29 @@ def test_waypoint_world_two_stage_navigation():
     assert np.array_equal(world.position, world.waypoint2)
 
 
+def test_waypoint_bonus_is_paid_once_and_hold_does_not_repeat_it():
+    world = WaypointNavigationWorld(seed=77, delay=2, horizon=12)
+    while not world.visited_waypoint1:
+        _, reward, _ = world.step(world.expert_action())
+    assert reward == 0.3
+    for _ in range(2):
+        observation, reward, done = world.step(6)
+        assert reward == -0.01
+        assert not done
+        assert observation[world.dir2] == 0.25
+    while not world.done:
+        _, reward, _ = world.step(world.expert_action())
+    assert world.success
+    assert reward == 1.0
+
+
+@pytest.mark.parametrize('amplitude', [True, False, '0.75', None, float('nan'),
+                                       float('inf'), -0.1, 2.1])
+def test_distractor_amplitude_rejects_invalid_values(amplitude):
+    with pytest.raises(ValueError, match='distractor_amplitude'):
+        DistractionNavigationWorld(seed=1, distractor_amplitude=amplitude)
+
+
 def test_stress_expert_batch_conformance():
     for family in ('straight', 'distraction', 'waypoint'):
         batch = stress_expert_batch([101, 102], task_family=family, delay=2, horizon=8)

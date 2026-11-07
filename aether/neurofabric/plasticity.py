@@ -4,7 +4,9 @@ Enables causal ablation of message/scalar routes and activity-dependent
 re-wiring with atomic buffer reconciliation and graph mode updates.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
+import math
+from numbers import Integral, Real
 import numpy as np
 import torch
 from torch import nn
@@ -52,70 +54,91 @@ def lesion_region_links(topology: Topology, severed_pairs: list,
 def reconcile_model_topology(model, new_topology: Topology) -> None:
     """Atomically reconcile a TissueModel with a newly modified Topology.
 
-    Recomputes sparse degrees, pooling matrix, carrier eigenvalues/eigenvectors,
-    and attention mask without disrupting model parameters or neuron states.
+    All validation and derived tensors are prepared before committing changes.
+    Neuron and region counts are fixed; membership and edges may change. Scalar
+    weights follow their directed endpoints, with new edges initialized to 0.4.
+    Parameter identities survive unchanged shapes. Changing scalar edge count
+    replaces ``edge_weights``; recreate the optimizer afterwards. Reordering or
+    replacing scalar endpoints also requires resetting/remapping optimizer
+    moments and pending gradients, which this model-only operation does not own.
     """
     c = model.config
-    # 1. Update basic graph topology buffers
-    for name in ('scalar_sources', 'scalar_targets', 'region_sources',
-                 'region_targets', 'neuron_regions'):
-        model._buffers[name] = torch.tensor(getattr(new_topology, name).copy())
-
-    # 2. Recompute scalar degree
+    if not isinstance(new_topology, Topology):
+        raise ValueError('new_topology must be a validated Topology')
+    if (len(new_topology.neuron_regions) != c.neuron_count
+            or int(new_topology.neuron_regions.max()) + 1 != c.region_count):
+        raise ValueError('topology must preserve neuron and region counts')
+    new_config = replace(c, scalar_edges=len(new_topology.scalar_sources),
+                         region_message_edges=len(new_topology.region_sources))
+    # Use the same canonical FP32 derivations as construction/checkpoint loading,
+    # then restore each buffer's existing dtype and device.
+    prepared = {name: torch.tensor(getattr(new_topology, name).copy())
+                for name in ('scalar_sources', 'scalar_targets', 'region_sources',
+                             'region_targets', 'neuron_regions')}
     scalar_deg = np.bincount(new_topology.scalar_targets, minlength=c.neuron_count)
-    model._buffers['scalar_degree'] = torch.tensor(np.maximum(scalar_deg, 1), dtype=torch.float32)
-
-    # 3. Recompute region degree
+    prepared['scalar_degree'] = torch.tensor(np.maximum(scalar_deg, 1), dtype=torch.float32)
     region_deg = np.bincount(new_topology.region_targets, minlength=c.region_count)
-    model._buffers['region_degree'] = torch.tensor(np.maximum(region_deg, 1), dtype=torch.float32)
-
-    # 4. Recompute pooling
+    prepared['region_degree'] = torch.tensor(np.maximum(region_deg, 1), dtype=torch.float32)
     pool = torch.zeros(c.region_count, c.neuron_count)
-    neuron_regions = torch.tensor(new_topology.neuron_regions.copy(), dtype=torch.int64)
+    neuron_regions = prepared['neuron_regions']
     pool[neuron_regions, torch.arange(c.neuron_count)] = 1.0
     pool /= pool.sum(1, keepdim=True)
-    model._buffers['pooling'] = pool
-
-    # 5. Recompute carrier eigenvalues and eigenvectors
+    prepared['pooling'] = pool
     eigenvalues, carriers = graph_modes(new_topology.region_adjacency(), c.mode_count)
-    model._buffers['carrier_eigenvalues'] = torch.tensor(eigenvalues, dtype=torch.float32)
-    model._buffers['carriers'] = torch.tensor(carriers, dtype=torch.float32)
-
-    # 6. Recompute attention mask
+    prepared['carrier_eigenvalues'] = torch.tensor(eigenvalues, dtype=torch.float32)
+    prepared['carriers'] = torch.tensor(carriers, dtype=torch.float32)
     mask = torch.zeros(c.region_count, c.region_count, dtype=torch.bool)
-    if len(new_topology.region_targets) > 0:
-        targets = torch.tensor(new_topology.region_targets.copy(), dtype=torch.int64)
-        sources = torch.tensor(new_topology.region_sources.copy(), dtype=torch.int64)
-        mask[targets, sources] = True
-    model._buffers['attention_mask'] = mask
+    mask[prepared['region_targets'], prepared['region_sources']] = True
+    prepared['attention_mask'] = mask
+    prepared['input_profile'] = (torch.linspace(0.6, 1.4, c.neuron_count)
+                                 * (neuron_regions == 0)).view(1, -1, 1)
+    prepared['readout_neurons'] = neuron_regions == c.region_count - 1
+    prepared = {name: value.to(device=model._buffers[name].device,
+                               dtype=model._buffers[name].dtype)
+                for name, value in prepared.items()}
 
-    # 7. Reconcile scalar edge weights if scalar topology edge count changed
-    new_scalar_count = len(new_topology.scalar_sources)
-    if new_scalar_count != model.edge_weights.numel():
-        old_pairs = list(zip(model.topology.scalar_sources.tolist(), model.topology.scalar_targets.tolist()))
-        new_pairs = list(zip(new_topology.scalar_sources.tolist(), new_topology.scalar_targets.tolist()))
-        weight_map = {pair: w.item() for pair, w in zip(old_pairs, model.edge_weights)}
-
-        new_weights = []
-        for pair in new_pairs:
-            new_weights.append(weight_map.get(pair, 0.4))
-
-        model.edge_weights = nn.Parameter(torch.tensor(new_weights, dtype=torch.float32))
-
-    # Update authoritative topology snapshot and config link counts
-    model.topology = new_topology
-    from dataclasses import replace
-    model.config = replace(
-        model.config,
-        region_message_edges=len(new_topology.region_sources),
-        scalar_edges=len(new_topology.scalar_sources),
-    )
+    old_parameter = model.edge_weights
+    old_pairs = list(zip(model.topology.scalar_sources, model.topology.scalar_targets))
+    old_indexes = {pair: index for index, pair in enumerate(old_pairs)}
+    new_pairs = list(zip(new_topology.scalar_sources, new_topology.scalar_targets))
+    new_weights = old_parameter.detach().new_full((len(new_pairs),), 0.4)
+    for index, pair in enumerate(new_pairs):
+        if pair in old_indexes:
+            new_weights[index] = old_parameter.detach()[old_indexes[pair]]
+    replacement = (old_parameter if new_weights.shape == old_parameter.shape else
+                   nn.Parameter(new_weights, requires_grad=old_parameter.requires_grad))
+    originals = dict(model._buffers)
+    old_topology, old_weights = model.topology, old_parameter.detach().clone()
+    try:
+        if replacement is old_parameter:
+            with torch.no_grad():
+                old_parameter.copy_(new_weights)
+        model.edge_weights = replacement
+        model._buffers.update(prepared)
+        model.config, model.topology = new_config, new_topology
+    except Exception:
+        model._buffers.clear()
+        model._buffers.update(originals)
+        model.edge_weights = old_parameter
+        with torch.no_grad():
+            old_parameter.copy_(old_weights)
+        model.config, model.topology = c, old_topology
+        raise
 
 
 class HebbianPlasticityEngine:
-    """Activity-dependent structural rewiring engine with degree conservation."""
+    """Exploratory correlation heuristic preserving the total regional edge budget.
+
+    Per-region degrees and task performance are not conserved or guaranteed.
+    """
 
     def __init__(self, pruning_percentile: float = 10.0, rewiring_budget: int = 4):
+        if (isinstance(pruning_percentile, bool) or not isinstance(pruning_percentile, Real)
+                or not math.isfinite(pruning_percentile) or not 0 <= pruning_percentile <= 100):
+            raise ValueError('pruning_percentile must be finite and in [0, 100]')
+        if (isinstance(rewiring_budget, bool) or not isinstance(rewiring_budget, Integral)
+                or rewiring_budget < 0):
+            raise ValueError('rewiring_budget must be a nonnegative integer')
         self.pruning_percentile = float(pruning_percentile)
         self.rewiring_budget = int(rewiring_budget)
 
@@ -126,15 +149,18 @@ class HebbianPlasticityEngine:
         """
         top = model.topology
         r_count = model.config.region_count
-        T = len(regional_activity_history)
-        if T < 2:
-            raise ValueError('activity history requires at least 2 ticks to compute correlation')
-
-        # Correlation between regional activity series
-        act = regional_activity_history - regional_activity_history.mean(axis=0, keepdims=True)
-        std = act.std(axis=0, keepdims=True) + 1e-8
-        norm_act = act / std
-        corr = (norm_act.T @ norm_act) / float(T)
+        activity = np.asarray(regional_activity_history)
+        if (activity.ndim != 2 or activity.shape[1] != r_count or len(activity) < 2
+                or activity.dtype.kind not in 'iuf' or not np.isfinite(activity).all()):
+            raise ValueError('activity must be finite real values with shape (at least 2 ticks, region_count)')
+        # Scale before centering to avoid overflow on finite, large observations.
+        activity = activity.astype(np.float64)
+        scale = np.max(np.abs(activity), axis=0, keepdims=True)
+        act = np.divide(activity, scale, out=np.zeros_like(activity), where=scale > 0)
+        act -= act.mean(axis=0, keepdims=True)
+        norms = np.linalg.norm(act, axis=0, keepdims=True)
+        normalized = np.divide(act, norms, out=np.zeros_like(act), where=norms > 0)
+        corr = normalized.T @ normalized
 
         r_sources = top.region_sources.tolist()
         r_targets = top.region_targets.tolist()
@@ -148,9 +174,9 @@ class HebbianPlasticityEngine:
                                     model.carrier_eigenvalues.tolist())
 
         threshold = np.percentile(link_corrs, self.pruning_percentile)
-        prune_candidates = [edge for edge, c_val in zip(existing_edges, link_corrs) if c_val <= threshold]
-        pruned = prune_candidates[:self.rewiring_budget]
-        surviving_edges = [edge for edge in existing_edges if edge not in set(pruned)]
+        prune_candidates = sorted(
+            [edge for edge, c_val in zip(existing_edges, link_corrs) if c_val <= threshold],
+            key=lambda edge: (corr[edge], edge))
 
         # Find candidate pairs to sprout with highest correlation
         candidates = []
@@ -159,8 +185,15 @@ class HebbianPlasticityEngine:
                 if s != t and (s, t) not in existing_set:
                     candidates.append(((s, t), corr[s, t]))
 
-        candidates.sort(key=lambda pair: pair[1], reverse=True)
-        to_add = [pair for pair, _ in candidates[:len(pruned)]]
+        candidates.sort(key=lambda pair: (-pair[1], pair[0]))
+        edit_count = min(self.rewiring_budget, len(prune_candidates), len(candidates))
+        if not edit_count:
+            return PlasticityReport(top.version, top.version, 0, 0, 0, 0,
+                                    model.carrier_eigenvalues.tolist())
+        pruned = prune_candidates[:edit_count]
+        removed = set(pruned)
+        surviving_edges = [edge for edge in existing_edges if edge not in removed]
+        to_add = [pair for pair, _ in candidates[:edit_count]]
 
         final_edges = surviving_edges + to_add
         final_edges.sort(key=lambda pair: (pair[1], pair[0]))

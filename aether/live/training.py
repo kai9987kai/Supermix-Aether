@@ -13,7 +13,7 @@ from uuid import uuid4
 import torch
 from torch.nn import functional as F
 
-from aether.environments.navigation import expert_batch
+from aether.environments.stress import TASK_FAMILIES, stress_expert_batch
 from aether.evidence.receipts import source_fingerprint, write_receipt
 from aether.experiments.study import evaluate
 from aether.live.models import clone_model
@@ -44,7 +44,7 @@ class TrainingJob:
         self._candidate_model = None
         self._state = {'status': 'idle', 'progress': 0, 'total': 0, 'curve': [],
                        'comparison': None, 'can_apply': False, 'candidate': None,
-                       'source_digest': None, 'task_delay': None, 'error': None,
+                       'source_digest': None, 'task_delay': None, 'task_family': None, 'error': None,
                        'output_directory': None, 'label': 'Exploratory imitation sandbox'}
 
     def snapshot(self) -> dict:
@@ -61,11 +61,13 @@ class TrainingJob:
         with self._lock:
             return self._state['status'] == 'ready' and self._state['can_apply']
 
-    def start(self, model, updates: int, output_root, delay: int = 3):
+    def start(self, model, updates: int, output_root, delay: int = 3, task_family: str = 'straight'):
         if isinstance(updates, bool) or not isinstance(updates, Integral) or not 1 <= updates <= 100:
             raise ValueError('updates must be an integer in [1,100]')
         if isinstance(delay, bool) or not isinstance(delay, Integral) or not 1 <= delay <= 12:
             raise ValueError('delay must be an integer in [1,12]')
+        if not isinstance(task_family, str) or task_family not in TASK_FAMILIES:
+            raise ValueError(f'task_family must be one of {TASK_FAMILIES}')
         if model.config.input_dimension != 12 or model.config.action_count != 7:
             raise ValueError('live training requires the navigation observation/action interface')
         root = Path(output_root).resolve()
@@ -83,12 +85,13 @@ class TrainingJob:
             self._state = {'status': 'running', 'progress': 0, 'total': int(updates),
                            'curve': [], 'comparison': None, 'can_apply': False,
                            'candidate': None, 'source_digest': source_digest,
-                           'task_delay': int(delay), 'error': None,
+                           'task_delay': int(delay), 'task_family': task_family, 'error': None,
                            'output_directory': str(directory),
                            'label': 'Exploratory imitation sandbox'}
             torch.set_num_threads(1)
             self._thread = threading.Thread(target=self._run,
-                                            args=(baseline, candidate, int(updates), int(delay), directory, identifier),
+                                            args=(baseline, candidate, int(updates), int(delay),
+                                                  task_family, directory, identifier),
                                             name='aether-candidate-training', daemon=True)
             self._thread.start()
         return self.snapshot()
@@ -101,47 +104,62 @@ class TrainingJob:
         if self._stop.is_set():
             raise _Cancelled()
 
-    def _evaluate(self, model, delay, query_seeds, retention_seeds):
+    def _evaluate(self, model, delay, task_family, query_seeds, retention_seeds):
+        matrix = {}
+        for family in TASK_FAMILIES:
+            self._check_cancelled()
+            query = evaluate(model, query_seeds, delay=delay, horizon=delay + 6,
+                             task_family=family)
+            self._check_cancelled()
+            retention = evaluate(model, retention_seeds, delay=delay + 2, horizon=delay + 8,
+                                 task_family=family)
+            matrix[family] = {'query': query, 'retention': retention}
         self._check_cancelled()
-        query = evaluate(model, query_seeds, delay=delay, horizon=delay + 6)
-        self._check_cancelled()
-        retention = evaluate(model, retention_seeds, delay=delay + 2, horizon=delay + 8)
-        self._check_cancelled()
-        return {'query': query, 'retention': retention}
+        return dict(matrix[task_family], task_matrix=matrix)
 
-    def _run(self, baseline, candidate, updates, delay, directory, identifier):
+    def _run(self, baseline, candidate, updates, delay, task_family, directory, identifier):
         started = time.perf_counter()
         source_root = Path(__file__).resolve().parents[2]
         record = {'schema': 'aether.live.training.v1', 'identifier': identifier,
                   'status': 'running', 'protocol': candidate.protocol,
                   'model_config': asdict(candidate.config), 'model_seed': candidate.seed,
                   'source_digest': baseline.state_digest(), 'task_delay': delay,
+                  'task_family': task_family,
                   'updates_requested': updates, 'learning_rate': .003, 'batch_size': 8,
                   'support_seeds': [], 'executed_support_steps': 0, 'curve': [],
                   'promoted': False,
                   'limitations': ['Exploratory interactive imitation, not reinforcement learning.',
                                   'Repeated query feedback is not a fresh confirmatory study.',
-                                  'Twelve paired worlds sample the same six fixed goals.',
+                                  'Twelve shared seeds per condition sample fixed task families; not new geometries.',
+                                  'Cross-task retention is a local diagnostic on a fixed task set, not statistical advancement.',
+                                  'Waypoint stage two includes a visible secondary direction cue.',
                                   'Local retention eligibility does not establish statistical superiority.']}
         try:
             self._check_cancelled()
             metadata = {'source_fingerprint': source_fingerprint(source_root),
-                        'purpose': 'exploratory live adaptation; no formal promotion'}
+                        'purpose': 'exploratory live adaptation; no formal promotion',
+                        'task_family': task_family, 'task_delay': delay}
             offset = candidate.seed * 1000
             query_seeds = [4_000_000_000 + offset + i for i in range(12)]
             retention_seeds = [5_000_000_000 + offset + i for i in range(12)]
-            before = self._evaluate(baseline, delay, query_seeds, retention_seeds)
+            before = self._evaluate(baseline, delay, task_family, query_seeds, retention_seeds)
             record['before'] = before
             comparison = {'before': {'query_success': before['query']['success_rate'],
                                      'retention_success': before['retention']['success_rate']},
-                          'after': None}
+                          'after': None,
+                          'task_matrix': {
+                              family: {'before': {
+                                  'query_success': scores['query']['success_rate'],
+                                  'retention_success': scores['retention']['success_rate']},
+                                  'after': None, 'retention_passed': None}
+                              for family, scores in before['task_matrix'].items()}}
             self._update(comparison=comparison)
             optimizer = torch.optim.AdamW(candidate.parameters(), lr=.003)
             candidate.train()
             for update in range(updates):
                 self._check_cancelled()
                 seeds = [3_000_000_000 + candidate.seed * 10000 + update * 8 + i for i in range(8)]
-                batch = expert_batch(seeds, delay=delay, horizon=delay + 6)
+                batch = stress_expert_batch(seeds, task_family=task_family, delay=delay, horizon=delay + 6)
                 observations = torch.from_numpy(batch['observations'])
                 targets, mask = torch.from_numpy(batch['actions']), torch.from_numpy(batch['mask'])
                 optimizer.zero_grad(set_to_none=True)
@@ -160,21 +178,31 @@ class TrainingJob:
                 self._update(progress=update + 1, curve=record['curve'])
             candidate.eval()
             self._update(status='evaluating')
-            after = self._evaluate(candidate, delay, query_seeds, retention_seeds)
+            after = self._evaluate(candidate, delay, task_family, query_seeds, retention_seeds)
             record['after'] = after
             if baseline.state_digest() != record['source_digest']:
                 raise RuntimeError('baseline changed during isolated training')
             self._check_cancelled()
-            eligible = retention_eligible(before['retention']['success_rate'], after['retention']['success_rate'])
+            retention_gates = {}
+            for family in TASK_FAMILIES:
+                before_scores, after_scores = before['task_matrix'][family], after['task_matrix'][family]
+                retention_gates[family] = retention_eligible(
+                    before_scores['retention']['success_rate'], after_scores['retention']['success_rate'])
+                comparison['task_matrix'][family].update(
+                    after={'query_success': after_scores['query']['success_rate'],
+                           'retention_success': after_scores['retention']['success_rate']},
+                    retention_passed=retention_gates[family])
+            eligible = all(retention_gates.values())
             comparison['after'] = {'query_success': after['query']['success_rate'],
                                    'retention_success': after['retention']['success_rate']}
             record.update(status='ready', trained_digest=candidate.state_digest(),
-                          can_apply=eligible, comparison=comparison,
+                          can_apply=eligible, comparison=comparison, retention_gates=retention_gates,
                           elapsed_seconds=time.perf_counter() - started)
             checkpoint = {'schema': 'aether.live.candidate.v1', 'model_config': asdict(candidate.config),
                           'protocol': candidate.protocol, 'seed': candidate.seed,
                           'state_dict': candidate.state_dict(), 'trained_digest': candidate.state_digest(),
-                          'source_digest': record['source_digest'], 'task_delay': delay}
+                          'source_digest': record['source_digest'], 'task_delay': delay,
+                          'task_family': task_family}
             torch.save(checkpoint, directory / 'candidate.pt')
             self._save_record(directory, record, metadata)
             with self._lock:
@@ -186,7 +214,8 @@ class TrainingJob:
                     self._candidate_model = candidate
                     self._state.update(status='ready', comparison=comparison, can_apply=eligible,
                                        candidate={'id': identifier, 'can_apply': eligible,
-                                                  'label': f'{candidate.protocol} · {updates} live updates',
+                                                  'task_family': task_family,
+                                                  'label': f'{candidate.protocol} · {task_family} · {updates} live updates',
                                                   'path': str(directory / 'candidate.pt')})
         except _Cancelled:
             record.update(status='cancelled', can_apply=False, elapsed_seconds=time.perf_counter() - started)

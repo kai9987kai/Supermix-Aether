@@ -168,9 +168,10 @@ def test_training_busy_controls_and_apply_rollback(app):
         def snapshot(self):
             return {'status': self.status, 'progress': 0, 'total': 1, 'curve': [],
                     'can_apply': self.can_apply, 'candidate': None, 'comparison': None, 'error': None,
-                    'source_digest': getattr(self, 'source_digest', None), 'task_delay': 3}
+                    'source_digest': getattr(self, 'source_digest', None), 'task_delay': 3,
+                    'task_family': 'straight'}
 
-        def start(self, model, updates, output_root, delay=3):
+        def start(self, model, updates, output_root, delay=3, task_family='straight'):
             import copy
             self.source_digest = model.state_digest()
             self.candidate_model = copy.deepcopy(model)
@@ -194,6 +195,11 @@ def test_training_busy_controls_and_apply_rollback(app):
         time.sleep(.025)
     assert app.state()['training']['status'] == 'ready'
     assert app.state()['playing'] is False
+    app.control({'action': 'configure', 'settings': {'task_family': 'waypoint'}})
+    assert app.state()['training']['can_apply'] is False
+    with pytest.raises(ValueError, match='stale'):
+        app.control({'action': 'apply'})
+    app.control({'action': 'configure', 'settings': {'task_family': 'straight'}})
     # A completed candidate belongs to the exact task delay it was trained on.
     app.control({'action': 'configure', 'settings': {'delay': 4}})
     with pytest.raises(ValueError, match='stale'):
@@ -205,6 +211,28 @@ def test_training_busy_controls_and_apply_rollback(app):
     restored = app.control({'action': 'rollback'})
     assert restored['provenance']['kind'] == 'recorded'
     assert app.session.model.state_digest() == original
+
+
+def test_structural_controls_support_rollback_and_record_measured_ticks(app):
+    initial = app.state()
+    with pytest.raises(ValueError, match='two executed'):
+        app.control({'action': 'rewire'})
+    assert app.state() == initial
+    link = initial['topology']['links'][0]
+    lesion = app.control({'action': 'lesion', 'region_pair': link})
+    assert lesion['can_rollback']
+    assert lesion['provenance']['kind'] == 'structurally_adapted'
+    app.control({'action': 'step'})
+    stepped = app.control({'action': 'step'})
+    assert stepped['execution_profile']['samples'] == 2
+    assert stepped['execution_profile']['last_paired_tick_us'] > 0
+    assert stepped['plasticity']['can_rewire']
+    rewired = app.control({'action': 'rewire'})
+    assert rewired['plasticity']['observed_ticks'] == 2
+    restored = app.control({'action': 'rollback'})
+    assert restored['model']['digest'] == lesion['model']['digest']
+    # Each mutation has one reversible previous model.
+    assert not restored['can_rollback']
 
 
 def test_stream_client_limit_and_clean_close(http_server, app):

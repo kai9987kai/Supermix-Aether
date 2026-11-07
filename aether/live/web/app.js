@@ -11,6 +11,7 @@
   let connected = false;
   let animation = 0;
   let catalogSignature = '';
+  let linkSignature = '';
   let eventSource;
   let initialConnectionError = false;
 
@@ -71,6 +72,8 @@
     $('train').disabled = unavailable || training;
     $('apply').disabled = unavailable || frame.training?.status !== 'ready' || !candidateAllowed();
     $('rollback').disabled = unavailable || training || !(frame.can_rollback || frame.training?.can_rollback);
+    $('lesion').disabled = unavailable || training || frame.model?.protocol === 'scalar' || !frame.topology?.links?.length;
+    $('rewire').disabled = unavailable || training || !frame.plasticity?.can_rewire;
     $('play').innerHTML = frame.playing ? '<span aria-hidden="true">Ⅱ</span> Pause' : '<span aria-hidden="true">▶</span> Play';
     $('play').setAttribute('aria-label', frame.playing ? 'Pause live execution' : 'Play live execution');
   }
@@ -125,7 +128,7 @@
     const model = frame.model || {};
     const provenance = frame.provenance || {};
     const source = String(provenance.kind || provenance.source || provenance.type || 'recorded').toLowerCase();
-    const sourceLabel = source.includes('adapt') || source.includes('candidate') || source.includes('session') ? 'Session-adapted weights' : source.includes('fresh') || source.includes('random') ? 'Fresh weights' : 'Recorded checkpoint';
+    const sourceLabel = source.includes('structural') ? 'Structurally adapted model' : source.includes('adapt') || source.includes('candidate') || source.includes('session') ? 'Session-adapted weights' : source.includes('fresh') || source.includes('random') ? 'Fresh weights' : 'Recorded checkpoint';
     text('protocol', String(model.protocol || '—').toUpperCase());
     text('provenance', sourceLabel);
     text('checkpoint-note', provenance.label || `${sourceLabel} · ${frame.checkpoints?.length || 0} available`);
@@ -133,7 +136,10 @@
     text('fabric-detail', `${number(Array.isArray(model.regions) ? model.regions.length : model.regions)} regions / ${number(model.modes)} message modes`);
     const flops = model.step_flops;
     text('compute-flops', finite(flops) ? (flops >= 1e6 ? `${(flops / 1e6).toFixed(2)}M` : `${number(flops)}`) : '—');
-    text('compute-detail', `${number(model.parameter_count)} params · CPU`);
+    text('compute-detail', `estimated FLOPs / step · ${number(model.parameter_count)} params`);
+    const timing = frame.execution_profile;
+    text('execution-note', finite(timing?.last_paired_tick_us) ? `Paired execution: ${number(timing.last_paired_tick_us / 1000, 2)} ms last / ${number(timing.mean_paired_tick_us / 1000, 2)} ms mean · ${number(timing.samples)} ticks · includes telemetry` : 'Step to measure paired execution time.');
+    text('task-note', `${frame.observation_boundary || ''}${frame.task?.family === 'waypoint' ? ` Active waypoint ${frame.candidate?.task?.stage || 1} of 2.` : ''}`);
     text('episode', finite(frame.episode) ? String(frame.episode).padStart(3, '0') : '—');
     text('seed-summary', `seed ${number(frame.seed)}`);
     text('tick', finite(frame.tick) ? String(frame.tick).padStart(2, '0') : '—');
@@ -227,6 +233,16 @@
     const delivered = frame.candidate?.delivered_payload_bytes;
     text('delivered-payload', `Delivered ${finite(delivered) ? delivered >= 1024 ? `${number(delivered / 1024, 2)} KiB` : `${number(delivered)} B` : '—'}`);
     text('link-count', `${number(frame.topology?.links?.length)} directed links`);
+    const links = frame.topology?.links || [];
+    const signature = JSON.stringify(links);
+    if (signature !== linkSignature) {
+      const selected = $('lesion-link').value;
+      $('lesion-link').replaceChildren(...links.map(([source, target]) => new Option(`Region ${source} → ${target}`, `${source}:${target}`)));
+      if (links.some(([source, target]) => `${source}:${target}` === selected)) $('lesion-link').value = selected;
+      linkSignature = signature;
+    }
+    const p = frame.plasticity || {};
+    text('plasticity-note', `${number(p.observed_ticks_available)} executed activity ticks available.${p.operation ? ` Last ${p.operation}: ${number(p.region_links_pruned)} removed, ${number(p.region_links_added)} added.${p.activity_source ? ` Used ${number(p.observed_ticks)} measured ticks.` : ''}` : ''}`);
   }
 
   function lossPoints() {
@@ -267,6 +283,25 @@
         item.append(values); comparison.append(item);
       });
     }
+    const matrix = $('transfer-matrix');
+    matrix.replaceChildren();
+    const rows = Object.entries(training.comparison?.task_matrix || {});
+    if (rows.length) {
+      const table = document.createElement('table');
+      const caption = document.createElement('caption');
+      caption.textContent = 'Before → after success on fixed paired seeds. Longer-delay retention margin: 5 percentage points.';
+      table.append(caption);
+      const header = table.createTHead().insertRow();
+      ['Task family', 'Query', 'Longer delay', 'Retention gate'].forEach(value => { const th = document.createElement('th'); th.scope = 'col'; th.textContent = value; header.append(th); });
+      const body = table.createTBody();
+      rows.forEach(([family, values]) => {
+        const row = body.insertRow();
+        [family, `${percent(values.before?.query_success)} → ${percent(values.after?.query_success)}`, `${percent(values.before?.retention_success)} → ${percent(values.after?.retention_success)}`, values.after ? values.retention_passed ? 'Passed' : 'Blocked' : 'Evaluating'].forEach(value => { row.insertCell().textContent = value; });
+      });
+      matrix.append(table);
+    } else {
+      const empty = document.createElement('p'); empty.className = 'empty-copy'; empty.textContent = trainingBusy() ? 'Evaluating all three task families…' : 'Train a candidate to compare all three task families.'; matrix.append(empty);
+    }
   }
 
   // CSS fixes the display size; only the backing store follows device pixel ratio.
@@ -293,10 +328,10 @@
   function drawWorld() {
     const canvas = surface('world'); if (!canvas) return;
     const { ctx, width, height } = canvas;
-    const scale = Math.min(width / 12.3, (height - 90) / 8.8);
+    const r = frame?.task?.radius || 3;
+    const scale = Math.min(width / (r * 4.1), (height - 90) / (r * 2.94));
     const origin = [width * .5, height * .53];
     const project = p => [origin[0] + (p[0] - p[1]) * scale * .87, origin[1] + (p[0] + p[1]) * scale * .39 - p[2] * scale * .92];
-    const r = 3;
     // Fixed navigation boundaries, independent of outcomes or movement.
     for (let value = -r; value <= r; value++) {
       line(ctx, project([-r, value, -r]), project([r, value, -r]), value === 0 ? '#2b4652' : '#1e3541');
@@ -305,8 +340,17 @@
     const corners = [[-r,-r,-r],[r,-r,-r],[r,r,-r],[-r,r,-r],[-r,-r,r],[r,-r,r],[r,r,r],[-r,r,r]];
     [[0,1],[1,2],[2,3],[3,0],[0,4],[1,5],[2,6],[3,7],[4,5],[5,6],[6,7],[7,4]].forEach(([a,b]) => line(ctx,project(corners[a]),project(corners[b]),'#29424e88',1,[3,5]));
     ctx.font = '9px Consolas, monospace'; ctx.fillStyle = '#7494a2';
-    [['+X',[3.6,0,-3]],['+Y',[0,3.6,-3]],['+Z',[-3,-3,3.5]]].forEach(([name,p]) => { const xy=project(p); ctx.fillText(name,xy[0]-5,xy[1]); });
+    [['+X',[r+.6,0,-r]],['+Y',[0,r+.6,-r]],['+Z',[-r,-r,r+.5]]].forEach(([name,p]) => { const xy=project(p); ctx.fillText(name,xy[0]-5,xy[1]); });
     if (!frame) return;
+    const waypoints = frame.candidate?.task?.waypoints || [];
+    if (waypoints.length > 1) {
+      line(ctx, project(waypoints[0]), project(waypoints[1]), '#7b9aa7', 1, [4, 5]);
+      waypoints.forEach((waypoint, index) => {
+        const point = project(waypoint);
+        ctx.beginPath(); ctx.arc(point[0], point[1], 16, 0, Math.PI * 2); ctx.strokeStyle = '#7b9aa7'; ctx.stroke();
+        ctx.fillStyle = '#b6cbd2'; ctx.fillText(`W${index + 1}`, point[0] - 6, point[1] - 21);
+      });
+    }
     const goal = frame.candidate?.goal;
     if (Array.isArray(goal)) {
       const base = project([goal[0],goal[1],-r]), p = project(goal);
@@ -435,6 +479,8 @@
   $('train').addEventListener('click',()=>{const updates=integerInput('updates',1,100);if(updates!==null)request({action:'train',updates});});
   $('apply').addEventListener('click',()=>request({action:'apply'}));
   $('rollback').addEventListener('click',()=>request({action:'rollback'}));
+  $('lesion').addEventListener('click',()=>request({action:'lesion',region_pair:$('lesion-link').value.split(':').map(Number)}));
+  $('rewire').addEventListener('click',()=>request({action:'rewire'}));
   reducedMotion.addEventListener('change',()=>{redraw();syncAnimation();});
   document.addEventListener('visibilitychange',syncAnimation);
   window.addEventListener('resize',redraw);
