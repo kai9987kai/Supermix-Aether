@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b1219">
+  <title>AETHER — Live Lab</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#laboratory">Skip to laboratory</a>
+  <div class="shell">
+    <header class="masthead">
+      <a class="brand" href="/" aria-label="AETHER Live Lab"><span class="brand-mark" aria-hidden="true">✳</span>AETHER<span class="brand-divider"></span><span class="brand-sub">LIVE LAB</span></a>
+      <nav aria-label="Laboratory links"><a href="/study/">Recorded study <span aria-hidden="true">↗</span></a><a href="/api/export" download>Export trace <span aria-hidden="true">↓</span></a><span class="connection" id="connection" role="status"><i></i>Connecting</span></nav>
+    </header>
+    <main id="laboratory">
+      <div class="intro"><div><p class="eyebrow">NEURAL SYSTEMS / LOCAL EXPERIMENT</p><h1>Watch the signal.<br><span>Change the channel.</span></h1><p class="intro-copy">A living view into a small neural navigation system.<br class="desktop-break"> Run paired worlds, disturb their messages, and follow what changes.</p></div><div class="evidence-tag"><span class="small-dot"></span><div>EXPLORATORY DEMO<small>Original pilot remains unpromoted</small></div></div></div>
+      <div id="error" class="error-banner" role="alert" hidden><span id="error-message"></span><button id="dismiss-error" aria-label="Dismiss error">×</button></div>
+      <section class="instrument-strip" aria-label="Active model and session">
+        <div><span class="metric-label">ACTIVE PROTOCOL</span><strong id="protocol">—</strong><small id="provenance">Waiting for local session</small></div>
+        <div><span class="metric-label">NEURAL FABRIC</span><strong id="fabric">—</strong><small id="fabric-detail">regions / message modes</small></div>
+        <div><span class="metric-label">EPISODE</span><strong id="episode">—</strong><small id="seed-summary">seed —</small></div>
+        <div><span class="metric-label">EXECUTED TICKS</span><strong id="tick">—</strong><small id="episode-state">Awaiting frame</small></div>
+        <div class="session-metric"><span class="metric-label">COMPUTE EFFORT</span><strong id="compute-flops">—</strong><small id="compute-detail">FLOPs / step</small></div>
+        <div class="session-metric"><span class="metric-label">SESSION COMPLETIONS</span><strong id="completed">—</strong><small id="successes">Observed successes —</small></div>
+      </section>
+      <div class="lab-grid">
+        <section class="panel world-panel" aria-labelledby="world-heading">
+          <div class="panel-heading"><div><p class="eyebrow">01 / PAIRED EXECUTION</p><h2 id="world-heading">Navigation field</h2></div><span class="status-pill" id="run-state">Loading</span></div>
+          <div class="world-view"><canvas id="world" role="img" aria-label="Projected three dimensional navigation world, loading"></canvas><div class="world-top"><span><i class="legend-line teal"></i>Intervened</span><span><i class="legend-line amber"></i>Clean control</span></div><div class="world-coordinates">X / Y / Z <span>PROJECTED 3D</span></div><div class="world-overlay" id="world-empty">Connecting to the local laboratory…</div><div class="world-bottom"><span><i class="target-symbol"></i>Goal · spectator view only</span><span id="movement-state">Waiting for state</span></div></div>
+          <div class="transport"><div class="transport-buttons"><button class="primary" id="play" data-mutation disabled><span aria-hidden="true">▶</span> Play</button><button id="step" data-mutation disabled title="Execute one tick">Step <span aria-hidden="true">↦</span></button><button id="reset" data-mutation disabled title="Restart with the current seed">Reset <span aria-hidden="true">↻</span></button></div><label class="speed-control">Speed <select id="speed" data-mutation aria-label="Execution speed" disabled><option value="1">1 tick/s</option><option value="2">2 ticks/s</option><option value="3">3 ticks/s</option><option value="4">4 ticks/s</option><option value="5">5 ticks/s</option><option value="6">6 ticks/s</option><option value="7">7 ticks/s</option><option value="8">8 ticks/s</option></select></label></div>
+          <div class="comparison-grid"><div><span class="metric-label">EFFECTIVE ACTION DIFFERENCES</span><strong id="effective-diffs">—</strong><small id="waiting-diffs">Waiting ticks: — differences</small></div><div><span class="metric-label">POSITION SEPARATION</span><strong id="separation">—</strong><small>Euclidean distance · world units</small></div><div><span class="metric-label">RETURN DIFFERENCE</span><strong id="return-delta">—</strong><small>Intervened − clean control</small></div></div>
+          <p class="branch-results" id="branch-results">Intervened — <span>Clean control —</span></p><p class="panel-note">Both worlds start with the same model, hidden state and seed. The initial goal cue is withheld from the policy on later ticks.</p>
+        </section>
+        <aside class="panel channel-panel" aria-labelledby="channel-heading">
+          <div class="panel-heading"><div><p class="eyebrow">02 / EXPERIMENT CONTROLS</p><h2 id="channel-heading">Shape the channel</h2></div><span class="control-glyph" aria-hidden="true">≋</span></div>
+          <label class="field-label" for="checkpoint">Model checkpoint</label><select id="checkpoint" data-mutation disabled><option>Loading checkpoint catalog…</option></select><p class="field-note" id="checkpoint-note">Recorded weights / loading</p>
+          <div class="seed-row"><label for="seed">Episode seed<input id="seed" type="number" min="0" max="4294967295" step="1" value="2077" data-mutation disabled></label><button id="new-seed" class="compact-button" data-mutation disabled>New seed <span aria-hidden="true">↗</span></button></div>
+          <label class="field-label" for="task-family" style="margin-top:12px;">Task family</label><select id="task-family" data-mutation disabled><option value="straight">Straight 3D · 6-axis goal</option><option value="distraction">Sensory distraction · false pulses</option><option value="waypoint">Sequential routes · 2 waypoints</option></select>
+          <div class="divider"></div>
+          <label class="field-label" for="intervention">Message intervention</label><select id="intervention" data-mutation disabled><option value="none">None · original messages</option><option value="zero_gain">Zero residual gain</option><option value="erase_packets">Erase message packets</option><option value="shuffle_phase">Shuffle message phase</option><option value="random_phase">Randomize message phase</option></select>
+          <div class="slider-field"><label for="loss">Packet loss <output for="loss" id="loss-value">0%</output></label><input id="loss" type="range" min="0" max="1" step="0.05" value="0" data-setting="loss_probability" data-mutation disabled><div class="range-ends"><span>Intact</span><span>All dropped</span></div></div>
+          <div class="slider-field"><label for="noise">Message noise <output for="noise" id="noise-value">0.00</output></label><input id="noise" type="range" min="0" max="1" step="0.05" value="0" data-setting="noise_std" data-mutation disabled></div>
+          <div class="slider-field"><label for="latency">Latency <output for="latency" id="latency-value">0 ticks</output></label><input id="latency" type="range" min="0" max="4" step="1" value="0" data-setting="latency_ticks" data-mutation disabled></div>
+          <div class="slider-field"><label for="bandwidth">Available bandwidth <output for="bandwidth" id="bandwidth-value">100%</output></label><input id="bandwidth" type="range" min="0" max="1" step="0.05" value="1" data-setting="bandwidth_fraction" data-mutation disabled><div class="range-ends"><span>Restricted</span><span>Full channel</span></div></div>
+          <label class="delay-field" for="delay">Goal delay <select id="delay" data-mutation disabled aria-label="Ticks before movement is enabled"></select></label>
+          <div class="reset-note"><span aria-hidden="true">↻</span><p>Changing a checkpoint or channel setting restarts both worlds on the current seed.</p></div>
+        </aside>
+        <section class="panel neural-panel" aria-labelledby="neural-heading">
+          <div class="panel-heading"><div><p class="eyebrow">03 / SIGNAL OBSERVATORY</p><h2 id="neural-heading">Inside the fabric</h2></div><span class="subtle-label">MEASURED PER TICK</span></div>
+          <div class="neural-layout"><div class="graph-wrap"><canvas id="regions" role="img" aria-label="Regional activity and message links, loading"></canvas><div class="graph-caption"><span><i class="small-dot"></i>State activity</span><span id="link-count">— directed links</span></div></div><div class="mode-panel"><p class="metric-label">MESSAGE MODE ENERGY</p><div id="mode-bars" class="mode-bars"><p class="empty-copy">Energy appears after execution.</p></div><div class="packet-stat"><strong id="payload">—</strong><span>admitted FP16 payload / tick</span><small id="delivered-payload">Delivered —</small></div><p class="field-note">Brightness and size show relative measured energy and activity within each frame.</p></div></div>
+        </section>
+        <section class="panel action-panel" aria-labelledby="action-heading">
+          <div class="panel-heading"><div><p class="eyebrow">04 / POLICY READOUT</p><h2 id="action-heading">From state to action</h2></div><span id="action-current" class="action-chip">—</span></div>
+          <p class="field-note">Intervened policy probabilities <span class="muted-separator">/</span> clean control markers</p><div id="action-bars" class="action-bars"></div>
+          <div class="timeline-heading"><span class="metric-label">EXECUTED ACTIONS</span><span class="timeline-key"><i></i>Movement locked</span></div><div class="timeline" id="timeline"><p class="empty-copy">Step or play to record actions.</p></div><p class="panel-note">Each column is one server tick. Locked ticks are counted separately from effective actions.</p>
+        </section>
+        <section class="panel training-panel" aria-labelledby="training-heading">
+          <div class="panel-heading"><div><p class="eyebrow">05 / BOUNDED ADAPTATION</p><h2 id="training-heading">A candidate, before a commitment.</h2></div><span class="status-pill" id="training-status">Idle</span></div>
+          <div class="training-layout"><div class="training-description"><p>Train a separate copy on expert trajectories, then compare it on held-out worlds. Active weights change only when you choose to use the candidate.</p><div class="training-controls"><label for="updates">Training updates<input id="updates" type="number" min="1" max="100" step="1" value="20" data-mutation disabled></label><button class="primary" id="train" data-mutation disabled>Train candidate <span aria-hidden="true">↗</span></button></div><div class="candidate-actions"><button id="apply" data-mutation disabled>Use candidate</button><button id="rollback" data-mutation disabled>Rollback</button></div><p class="field-note" id="candidate-note">Up to 100 updates. Live execution pauses during training.</p></div><div class="training-observation"><div class="loss-heading"><span class="metric-label">OBSERVED IMITATION LOSS</span><strong id="loss-current">—</strong></div><div class="loss-chart"><canvas id="loss-chart" role="img" aria-label="Training loss, no candidate trained yet"></canvas><span id="loss-empty">No training run yet</span></div><div class="progress-label"><span id="training-progress">Awaiting candidate</span><span id="training-total">0 / 0</span></div><progress id="training-meter" max="1" value="0" aria-label="Training progress"></progress><div id="training-comparison" class="training-comparison"></div></div></div>
+          <div class="training-caution"><span aria-hidden="true">◇</span><p>Candidate use is a local demo decision. A longer-delay regression beyond the retention limit blocks application; lower training loss alone does not establish improved general performance.</p></div>
+        </section>
+      </div>
+      <footer><div><span class="footer-brand">AETHER</span><span>Small system. Inspectable evidence.</span></div><p>One shared local session · CPU execution · exploratory observations<br>Recorded pilot results and source receipts remain in the <a href="/study/">original study ↗</a></p></footer>
+    </main>
+  </div>
+</body>
+</html>

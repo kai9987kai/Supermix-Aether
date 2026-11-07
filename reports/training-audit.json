@@ -1,0 +1,2111 @@
+{
+  "partial": false,
+  "completed_runs": 21,
+  "expected_runs": 21,
+  "config": {
+    "seeds": [
+      11,
+      29,
+      47
+    ],
+    "protocols": [
+      "scalar",
+      "scalar_matched",
+      "vector",
+      "attention",
+      "phase",
+      "modes",
+      "wave"
+    ],
+    "updates": 40,
+    "batch_size": 8,
+    "evaluation_episodes": 24,
+    "learning_rate": 0.003,
+    "delay": 3,
+    "horizon": 9,
+    "retention_delay": 5,
+    "retention_margin": 0.05,
+    "min_confirmatory_seeds": 30,
+    "model": {}
+  },
+  "checkpoint_audits": [
+    {
+      "protocol": "scalar",
+      "seed": 11,
+      "initial_digest_matches_reconstruction": true,
+      "training_updates": 40,
+      "executed_support_steps": 1600,
+      "first_loss": 1.9766292572021484,
+      "last_loss": 1.6290289163589478,
+      "evaluation_success": 0.25,
+      "retention_success": 0.16666666666666666,
+      "parameter_updates": {
+        "edge_weights": {
+          "l2_delta": 3.157332447926937,
+          "max_abs_delta": 0.09987476468086243,
+          "changed_elements": 4096,
+          "elements": 4096
+        },
+        "input_encoder.weight": {
+          "l2_delta": 1.2472082971935359,
+          "max_abs_delta": 0.12585359811782837,
+          "changed_elements": 384,
+          "elements": 384
+        },
+        "output_decoder.weight": {
+          "l2_delta": 0.6902087543645973,
+          "max_abs_delta": 0.13443847000598907,
+          "changed_elements": 224,
+          "elements": 224
+        }
+      }
+    },
+    {
+      "protocol": "scalar_matched",
+      "seed": 11,
+      "initial_digest_matches_reconstruction": true,
+      "training_updates": 40,
+      "executed_support_steps": 1600,
+      "first_loss": 1.9766292572021484,
+      "last_loss": 1.6216118335723877,
+      "evaluation_success": 0.25,
+      "retention_success": 0.16666666666666666,
+      "parameter_updates": {
+        "edge_weights": {
+          "l2_delta": 3.030743203404757,
+          "max_abs_delta": 0.09923318028450012,
+          "changed_elements": 4096,
+          "elements": 4096
+        },
+        "input_encoder.weight": {
+          "l2_delta": 1.2427610205030948,
+          "max_abs_delta": 0.12666772305965424,
+          "changed_elements": 384,
+          "elements": 384
+        },
+        "output_decoder.weight": {
+          "l2_delta": 0.6869380567162024,
+          "max_abs_delta": 0.1339508444070816,
+          "changed_elements": 224,
+          "elements": 224
+        },
+        "residual_gain": {
+          "l2_delta": 0.04236796498298645,
+          "max_abs_delta": 0.04236796498298645,
+          "changed_elements": 1,
+          "elements": 1,
+          "initial": 0.0,
+          "trained": 0.04236796498298645
+        },
+        "message_encoder.weight": {
+          "l2_delta": 1.837476025620353,
+          "max_abs_delta": 0.08081423491239548,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "message_decoder.weight": {
+          "l2_delta": 1.679977574502438,
+          "max_abs_delta": 0.08300374075770378,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "routing_query.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 1024
+        },
+        "routing_key.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 1024
+        },
+        "phase_encoder.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 256
+        },
+        "mode_gains": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 4
+        }
+      }
+    },
+    {
+      "protocol": "vector",
+      "seed": 11,
+      "initial_digest_matches_reconstruction": true,
+      "training_updates": 40,
+      "executed_support_steps": 1600,
+      "first_loss": 1.9766292572021484,
+      "last_loss": 1.644701600074768,
+      "evaluation_success": 0.25,
+      "retention_success": 0.16666666666666666,
+      "parameter_updates": {
+        "edge_weights": {
+          "l2_delta": 2.7597918643312593,
+          "max_abs_delta": 0.10572847723960876,
+          "changed_elements": 4096,
+          "elements": 4096
+        },
+        "input_encoder.weight": {
+          "l2_delta": 1.218772813327432,
+          "max_abs_delta": 0.1272444874048233,
+          "changed_elements": 384,
+          "elements": 384
+        },
+        "output_decoder.weight": {
+          "l2_delta": 0.6699338745173066,
+          "max_abs_delta": 0.1314488798379898,
+          "changed_elements": 224,
+          "elements": 224
+        },
+        "residual_gain": {
+          "l2_delta": 0.06667065620422363,
+          "max_abs_delta": 0.06667065620422363,
+          "changed_elements": 1,
+          "elements": 1,
+          "initial": 0.0,
+          "trained": 0.06667065620422363
+        },
+        "message_encoder.weight": {
+          "l2_delta": 2.1539405965767573,
+          "max_abs_delta": 0.11324820853769779,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "message_decoder.weight": {
+          "l2_delta": 1.7010993308664009,
+          "max_abs_delta": 0.09675692021846771,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "routing_query.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 1024
+        },
+        "routing_key.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 1024
+        },
+        "phase_encoder.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 256
+        },
+        "mode_gains": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 4
+        }
+      }
+    },
+    {
+      "protocol": "attention",
+      "seed": 11,
+      "initial_digest_matches_reconstruction": true,
+      "training_updates": 40,
+      "executed_support_steps": 1600,
+      "first_loss": 1.9766292572021484,
+      "last_loss": 1.6289132833480835,
+      "evaluation_success": 0.25,
+      "retention_success": 0.16666666666666666,
+      "parameter_updates": {
+        "edge_weights": {
+          "l2_delta": 2.654669591386418,
+          "max_abs_delta": 0.10984739661216736,
+          "changed_elements": 4096,
+          "elements": 4096
+        },
+        "input_encoder.weight": {
+          "l2_delta": 1.2235865365733918,
+          "max_abs_delta": 0.12949404120445251,
+          "changed_elements": 384,
+          "elements": 384
+        },
+        "output_decoder.weight": {
+          "l2_delta": 0.6672119454182951,
+          "max_abs_delta": 0.13025923073291779,
+          "changed_elements": 224,
+          "elements": 224
+        },
+        "residual_gain": {
+          "l2_delta": 0.06945231556892395,
+          "max_abs_delta": 0.06945231556892395,
+          "changed_elements": 1,
+          "elements": 1,
+          "initial": 0.0,
+          "trained": 0.06945231556892395
+        },
+        "message_encoder.weight": {
+          "l2_delta": 2.4182732874207438,
+          "max_abs_delta": 0.12178491055965424,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "message_decoder.weight": {
+          "l2_delta": 1.7542419799006215,
+          "max_abs_delta": 0.09860770404338837,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "routing_query.weight": {
+          "l2_delta": 2.2116512709644014,
+          "max_abs_delta": 0.08910450339317322,
+          "changed_elements": 1024,
+          "elements": 1024
+        },
+        "routing_key.weight": {
+          "l2_delta": 2.069912183905916,
+          "max_abs_delta": 0.09199251048266888,
+          "changed_elements": 1024,
+          "elements": 1024
+        },
+        "phase_encoder.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 256
+        },
+        "mode_gains": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 4
+        }
+      }
+    },
+    {
+      "protocol": "phase",
+      "seed": 11,
+      "initial_digest_matches_reconstruction": true,
+      "training_updates": 40,
+      "executed_support_steps": 1600,
+      "first_loss": 1.9766292572021484,
+      "last_loss": 1.6533125638961792,
+      "evaluation_success": 0.25,
+      "retention_success": 0.16666666666666666,
+      "parameter_updates": {
+        "edge_weights": {
+          "l2_delta": 2.567921777224901,
+          "max_abs_delta": 0.09566262364387512,
+          "changed_elements": 4096,
+          "elements": 4096
+        },
+        "input_encoder.weight": {
+          "l2_delta": 1.175912355119958,
+          "max_abs_delta": 0.12643828988075256,
+          "changed_elements": 384,
+          "elements": 384
+        },
+        "output_decoder.weight": {
+          "l2_delta": 0.6665821803145227,
+          "max_abs_delta": 0.13011686503887177,
+          "changed_elements": 224,
+          "elements": 224
+        },
+        "residual_gain": {
+          "l2_delta": 0.052670978009700775,
+          "max_abs_delta": 0.052670978009700775,
+          "changed_elements": 1,
+          "elements": 1,
+          "initial": 0.0,
+          "trained": 0.052670978009700775
+        },
+        "message_encoder.weight": {
+          "l2_delta": 1.7847937191439973,
+          "max_abs_delta": 0.11741948872804642,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "message_decoder.weight": {
+          "l2_delta": 1.6391241042999884,
+          "max_abs_delta": 0.08668802678585052,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "routing_query.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 1024
+        },
+        "routing_key.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 1024
+        },
+        "phase_encoder.weight": {
+          "l2_delta": 0.5748696481395076,
+          "max_abs_delta": 0.10406844317913055,
+          "changed_elements": 256,
+          "elements": 256
+        },
+        "mode_gains": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 4
+        }
+      }
+    },
+    {
+      "protocol": "modes",
+      "seed": 11,
+      "initial_digest_matches_reconstruction": true,
+      "training_updates": 40,
+      "executed_support_steps": 1600,
+      "first_loss": 1.9766292572021484,
+      "last_loss": 1.6282657384872437,
+      "evaluation_success": 0.25,
+      "retention_success": 0.16666666666666666,
+      "parameter_updates": {
+        "edge_weights": {
+          "l2_delta": 3.1177649525947295,
+          "max_abs_delta": 0.10108640789985657,
+          "changed_elements": 4096,
+          "elements": 4096
+        },
+        "input_encoder.weight": {
+          "l2_delta": 1.2502304463321812,
+          "max_abs_delta": 0.12605953216552734,
+          "changed_elements": 384,
+          "elements": 384
+        },
+        "output_decoder.weight": {
+          "l2_delta": 0.6894226723174645,
+          "max_abs_delta": 0.13437823951244354,
+          "changed_elements": 224,
+          "elements": 224
+        },
+        "residual_gain": {
+          "l2_delta": 0.07890307158231735,
+          "max_abs_delta": 0.07890307158231735,
+          "changed_elements": 1,
+          "elements": 1,
+          "initial": 0.0,
+          "trained": 0.07890307158231735
+        },
+        "message_encoder.weight": {
+          "l2_delta": 2.5738702058363865,
+          "max_abs_delta": 0.1305302232503891,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "message_decoder.weight": {
+          "l2_delta": 1.995565908775268,
+          "max_abs_delta": 0.11875227093696594,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "routing_query.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 1024
+        },
+        "routing_key.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 1024
+        },
+        "phase_encoder.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 256
+        },
+        "mode_gains": {
+          "l2_delta": 0.13921355570539848,
+          "max_abs_delta": 0.07902753353118896,
+          "changed_elements": 4,
+          "elements": 4
+        }
+      }
+    },
+    {
+      "protocol": "wave",
+      "seed": 11,
+      "initial_digest_matches_reconstruction": true,
+      "training_updates": 40,
+      "executed_support_steps": 1600,
+      "first_loss": 1.9766292572021484,
+      "last_loss": 1.6349045038223267,
+      "evaluation_success": 0.25,
+      "retention_success": 0.16666666666666666,
+      "parameter_updates": {
+        "edge_weights": {
+          "l2_delta": 3.0757763570897896,
+          "max_abs_delta": 0.10234019160270691,
+          "changed_elements": 4096,
+          "elements": 4096
+        },
+        "input_encoder.weight": {
+          "l2_delta": 1.2386821658348062,
+          "max_abs_delta": 0.12628543376922607,
+          "changed_elements": 384,
+          "elements": 384
+        },
+        "output_decoder.weight": {
+          "l2_delta": 0.6877708214003961,
+          "max_abs_delta": 0.13413996994495392,
+          "changed_elements": 224,
+          "elements": 224
+        },
+        "residual_gain": {
+          "l2_delta": 0.05487072840332985,
+          "max_abs_delta": 0.05487072840332985,
+          "changed_elements": 1,
+          "elements": 1,
+          "initial": 0.0,
+          "trained": 0.05487072840332985
+        },
+        "message_encoder.weight": {
+          "l2_delta": 2.2463617211305458,
+          "max_abs_delta": 0.12940630316734314,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "message_decoder.weight": {
+          "l2_delta": 2.0279605142808013,
+          "max_abs_delta": 0.12173755466938019,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "routing_query.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 1024
+        },
+        "routing_key.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 1024
+        },
+        "phase_encoder.weight": {
+          "l2_delta": 0.5684259766190924,
+          "max_abs_delta": 0.1104176938533783,
+          "changed_elements": 256,
+          "elements": 256
+        },
+        "mode_gains": {
+          "l2_delta": 0.1393745630839325,
+          "max_abs_delta": 0.08895111083984375,
+          "changed_elements": 4,
+          "elements": 4
+        }
+      }
+    },
+    {
+      "protocol": "scalar",
+      "seed": 29,
+      "initial_digest_matches_reconstruction": true,
+      "training_updates": 40,
+      "executed_support_steps": 1600,
+      "first_loss": 1.883522629737854,
+      "last_loss": 1.7224335670471191,
+      "evaluation_success": 0.0,
+      "retention_success": 0.16666666666666666,
+      "parameter_updates": {
+        "edge_weights": {
+          "l2_delta": 3.291766135482295,
+          "max_abs_delta": 0.10325857996940613,
+          "changed_elements": 4096,
+          "elements": 4096
+        },
+        "input_encoder.weight": {
+          "l2_delta": 1.2307814331534255,
+          "max_abs_delta": 0.11083346605300903,
+          "changed_elements": 384,
+          "elements": 384
+        },
+        "output_decoder.weight": {
+          "l2_delta": 0.5829537527997695,
+          "max_abs_delta": 0.12856918573379517,
+          "changed_elements": 224,
+          "elements": 224
+        }
+      }
+    },
+    {
+      "protocol": "scalar_matched",
+      "seed": 29,
+      "initial_digest_matches_reconstruction": true,
+      "training_updates": 40,
+      "executed_support_steps": 1600,
+      "first_loss": 1.883522629737854,
+      "last_loss": 1.7053536176681519,
+      "evaluation_success": 0.125,
+      "retention_success": 0.16666666666666666,
+      "parameter_updates": {
+        "edge_weights": {
+          "l2_delta": 3.2228621718249686,
+          "max_abs_delta": 0.10164114832878113,
+          "changed_elements": 4096,
+          "elements": 4096
+        },
+        "input_encoder.weight": {
+          "l2_delta": 1.2265875873781038,
+          "max_abs_delta": 0.11063633859157562,
+          "changed_elements": 384,
+          "elements": 384
+        },
+        "output_decoder.weight": {
+          "l2_delta": 0.5795939144020006,
+          "max_abs_delta": 0.12803442776203156,
+          "changed_elements": 224,
+          "elements": 224
+        },
+        "residual_gain": {
+          "l2_delta": 0.04475460946559906,
+          "max_abs_delta": 0.04475460946559906,
+          "changed_elements": 1,
+          "elements": 1,
+          "initial": 0.0,
+          "trained": -0.04475460946559906
+        },
+        "message_encoder.weight": {
+          "l2_delta": 1.9223757876503322,
+          "max_abs_delta": 0.07926744222640991,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "message_decoder.weight": {
+          "l2_delta": 1.295900509971594,
+          "max_abs_delta": 0.06285031139850616,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "routing_query.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 1024
+        },
+        "routing_key.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 1024
+        },
+        "phase_encoder.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 256
+        },
+        "mode_gains": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 4
+        }
+      }
+    },
+    {
+      "protocol": "vector",
+      "seed": 29,
+      "initial_digest_matches_reconstruction": true,
+      "training_updates": 40,
+      "executed_support_steps": 1600,
+      "first_loss": 1.883522629737854,
+      "last_loss": 1.7061491012573242,
+      "evaluation_success": 0.125,
+      "retention_success": 0.16666666666666666,
+      "parameter_updates": {
+        "edge_weights": {
+          "l2_delta": 2.709856139807735,
+          "max_abs_delta": 0.09424495697021484,
+          "changed_elements": 4096,
+          "elements": 4096
+        },
+        "input_encoder.weight": {
+          "l2_delta": 1.174665969317622,
+          "max_abs_delta": 0.11129027605056763,
+          "changed_elements": 384,
+          "elements": 384
+        },
+        "output_decoder.weight": {
+          "l2_delta": 0.5617647472378507,
+          "max_abs_delta": 0.12581294775009155,
+          "changed_elements": 224,
+          "elements": 224
+        },
+        "residual_gain": {
+          "l2_delta": 0.07207884639501572,
+          "max_abs_delta": 0.07207884639501572,
+          "changed_elements": 1,
+          "elements": 1,
+          "initial": 0.0,
+          "trained": -0.07207884639501572
+        },
+        "message_encoder.weight": {
+          "l2_delta": 2.007163050549495,
+          "max_abs_delta": 0.11816857382655144,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "message_decoder.weight": {
+          "l2_delta": 1.73576839851173,
+          "max_abs_delta": 0.09618169069290161,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "routing_query.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 1024
+        },
+        "routing_key.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 1024
+        },
+        "phase_encoder.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 256
+        },
+        "mode_gains": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 4
+        }
+      }
+    },
+    {
+      "protocol": "attention",
+      "seed": 29,
+      "initial_digest_matches_reconstruction": true,
+      "training_updates": 40,
+      "executed_support_steps": 1600,
+      "first_loss": 1.883522629737854,
+      "last_loss": 1.697231411933899,
+      "evaluation_success": 0.125,
+      "retention_success": 0.16666666666666666,
+      "parameter_updates": {
+        "edge_weights": {
+          "l2_delta": 2.5415755330919123,
+          "max_abs_delta": 0.09414243698120117,
+          "changed_elements": 4096,
+          "elements": 4096
+        },
+        "input_encoder.weight": {
+          "l2_delta": 1.184252152800353,
+          "max_abs_delta": 0.1149483323097229,
+          "changed_elements": 384,
+          "elements": 384
+        },
+        "output_decoder.weight": {
+          "l2_delta": 0.5611331974013081,
+          "max_abs_delta": 0.1257232129573822,
+          "changed_elements": 224,
+          "elements": 224
+        },
+        "residual_gain": {
+          "l2_delta": 0.0729963555932045,
+          "max_abs_delta": 0.0729963555932045,
+          "changed_elements": 1,
+          "elements": 1,
+          "initial": 0.0,
+          "trained": -0.0729963555932045
+        },
+        "message_encoder.weight": {
+          "l2_delta": 2.0788440629229696,
+          "max_abs_delta": 0.12251453101634979,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "message_decoder.weight": {
+          "l2_delta": 1.73543023998581,
+          "max_abs_delta": 0.09525755792856216,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "routing_query.weight": {
+          "l2_delta": 1.8663531176270993,
+          "max_abs_delta": 0.08444476127624512,
+          "changed_elements": 1024,
+          "elements": 1024
+        },
+        "routing_key.weight": {
+          "l2_delta": 1.639986026872158,
+          "max_abs_delta": 0.08182772248983383,
+          "changed_elements": 1024,
+          "elements": 1024
+        },
+        "phase_encoder.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 256
+        },
+        "mode_gains": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 4
+        }
+      }
+    },
+    {
+      "protocol": "phase",
+      "seed": 29,
+      "initial_digest_matches_reconstruction": true,
+      "training_updates": 40,
+      "executed_support_steps": 1600,
+      "first_loss": 1.883522629737854,
+      "last_loss": 1.7094414234161377,
+      "evaluation_success": 0.125,
+      "retention_success": 0.16666666666666666,
+      "parameter_updates": {
+        "edge_weights": {
+          "l2_delta": 2.536161177197024,
+          "max_abs_delta": 0.0961572527885437,
+          "changed_elements": 4096,
+          "elements": 4096
+        },
+        "input_encoder.weight": {
+          "l2_delta": 1.1447807822590703,
+          "max_abs_delta": 0.11396491527557373,
+          "changed_elements": 384,
+          "elements": 384
+        },
+        "output_decoder.weight": {
+          "l2_delta": 0.5622927394913009,
+          "max_abs_delta": 0.12518024444580078,
+          "changed_elements": 224,
+          "elements": 224
+        },
+        "residual_gain": {
+          "l2_delta": 0.07011377811431885,
+          "max_abs_delta": 0.07011377811431885,
+          "changed_elements": 1,
+          "elements": 1,
+          "initial": 0.0,
+          "trained": -0.07011377811431885
+        },
+        "message_encoder.weight": {
+          "l2_delta": 1.6546027987137033,
+          "max_abs_delta": 0.12100817263126373,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "message_decoder.weight": {
+          "l2_delta": 1.7730367690997422,
+          "max_abs_delta": 0.10843624174594879,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "routing_query.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 1024
+        },
+        "routing_key.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 1024
+        },
+        "phase_encoder.weight": {
+          "l2_delta": 0.4567090831782841,
+          "max_abs_delta": 0.10561273619532585,
+          "changed_elements": 256,
+          "elements": 256
+        },
+        "mode_gains": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 4
+        }
+      }
+    },
+    {
+      "protocol": "modes",
+      "seed": 29,
+      "initial_digest_matches_reconstruction": true,
+      "training_updates": 40,
+      "executed_support_steps": 1600,
+      "first_loss": 1.883522629737854,
+      "last_loss": 1.7195717096328735,
+      "evaluation_success": 0.0,
+      "retention_success": 0.16666666666666666,
+      "parameter_updates": {
+        "edge_weights": {
+          "l2_delta": 3.3086365314367354,
+          "max_abs_delta": 0.1028566062450409,
+          "changed_elements": 4096,
+          "elements": 4096
+        },
+        "input_encoder.weight": {
+          "l2_delta": 1.2289301600324256,
+          "max_abs_delta": 0.11107096076011658,
+          "changed_elements": 384,
+          "elements": 384
+        },
+        "output_decoder.weight": {
+          "l2_delta": 0.5822275672381586,
+          "max_abs_delta": 0.12847185134887695,
+          "changed_elements": 224,
+          "elements": 224
+        },
+        "residual_gain": {
+          "l2_delta": 0.10177977383136749,
+          "max_abs_delta": 0.10177977383136749,
+          "changed_elements": 1,
+          "elements": 1,
+          "initial": 0.0,
+          "trained": 0.10177977383136749
+        },
+        "message_encoder.weight": {
+          "l2_delta": 2.6049796922055055,
+          "max_abs_delta": 0.12777097523212433,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "message_decoder.weight": {
+          "l2_delta": 2.2315158469451144,
+          "max_abs_delta": 0.12996624410152435,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "routing_query.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 1024
+        },
+        "routing_key.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 1024
+        },
+        "phase_encoder.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 256
+        },
+        "mode_gains": {
+          "l2_delta": 0.17461322635920715,
+          "max_abs_delta": 0.09576523303985596,
+          "changed_elements": 4,
+          "elements": 4
+        }
+      }
+    },
+    {
+      "protocol": "wave",
+      "seed": 29,
+      "initial_digest_matches_reconstruction": true,
+      "training_updates": 40,
+      "executed_support_steps": 1600,
+      "first_loss": 1.883522629737854,
+      "last_loss": 1.7169203758239746,
+      "evaluation_success": 0.0,
+      "retention_success": 0.16666666666666666,
+      "parameter_updates": {
+        "edge_weights": {
+          "l2_delta": 3.1585571817773506,
+          "max_abs_delta": 0.10193881392478943,
+          "changed_elements": 4096,
+          "elements": 4096
+        },
+        "input_encoder.weight": {
+          "l2_delta": 1.214469153672589,
+          "max_abs_delta": 0.11096185445785522,
+          "changed_elements": 384,
+          "elements": 384
+        },
+        "output_decoder.weight": {
+          "l2_delta": 0.5820868116724942,
+          "max_abs_delta": 0.12809008359909058,
+          "changed_elements": 224,
+          "elements": 224
+        },
+        "residual_gain": {
+          "l2_delta": 0.07153468579053879,
+          "max_abs_delta": 0.07153468579053879,
+          "changed_elements": 1,
+          "elements": 1,
+          "initial": 0.0,
+          "trained": -0.07153468579053879
+        },
+        "message_encoder.weight": {
+          "l2_delta": 2.135907587754245,
+          "max_abs_delta": 0.1286318078637123,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "message_decoder.weight": {
+          "l2_delta": 2.309467551463819,
+          "max_abs_delta": 0.12593885511159897,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "routing_query.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 1024
+        },
+        "routing_key.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 1024
+        },
+        "phase_encoder.weight": {
+          "l2_delta": 0.48580845142229473,
+          "max_abs_delta": 0.08807942271232605,
+          "changed_elements": 256,
+          "elements": 256
+        },
+        "mode_gains": {
+          "l2_delta": 0.162295316863264,
+          "max_abs_delta": 0.11820793151855469,
+          "changed_elements": 4,
+          "elements": 4
+        }
+      }
+    },
+    {
+      "protocol": "scalar",
+      "seed": 47,
+      "initial_digest_matches_reconstruction": true,
+      "training_updates": 40,
+      "executed_support_steps": 1600,
+      "first_loss": 1.8969476222991943,
+      "last_loss": 1.8263310194015503,
+      "evaluation_success": 0.25,
+      "retention_success": 0.2916666666666667,
+      "parameter_updates": {
+        "edge_weights": {
+          "l2_delta": 3.5608463205499516,
+          "max_abs_delta": 0.11748561263084412,
+          "changed_elements": 4096,
+          "elements": 4096
+        },
+        "input_encoder.weight": {
+          "l2_delta": 1.1590987771200374,
+          "max_abs_delta": 0.1108018159866333,
+          "changed_elements": 384,
+          "elements": 384
+        },
+        "output_decoder.weight": {
+          "l2_delta": 0.6339600734113259,
+          "max_abs_delta": 0.1332380473613739,
+          "changed_elements": 224,
+          "elements": 224
+        }
+      }
+    },
+    {
+      "protocol": "scalar_matched",
+      "seed": 47,
+      "initial_digest_matches_reconstruction": true,
+      "training_updates": 40,
+      "executed_support_steps": 1600,
+      "first_loss": 1.8969476222991943,
+      "last_loss": 1.793847680091858,
+      "evaluation_success": 0.25,
+      "retention_success": 0.2916666666666667,
+      "parameter_updates": {
+        "edge_weights": {
+          "l2_delta": 3.093354847280762,
+          "max_abs_delta": 0.11248156428337097,
+          "changed_elements": 4096,
+          "elements": 4096
+        },
+        "input_encoder.weight": {
+          "l2_delta": 1.104335868726916,
+          "max_abs_delta": 0.1097593754529953,
+          "changed_elements": 384,
+          "elements": 384
+        },
+        "output_decoder.weight": {
+          "l2_delta": 0.6076349122279516,
+          "max_abs_delta": 0.13058167695999146,
+          "changed_elements": 224,
+          "elements": 224
+        },
+        "residual_gain": {
+          "l2_delta": 0.06987965852022171,
+          "max_abs_delta": 0.06987965852022171,
+          "changed_elements": 1,
+          "elements": 1,
+          "initial": 0.0,
+          "trained": 0.06987965852022171
+        },
+        "message_encoder.weight": {
+          "l2_delta": 2.6685299412420833,
+          "max_abs_delta": 0.06991893798112869,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "message_decoder.weight": {
+          "l2_delta": 1.6872394140300881,
+          "max_abs_delta": 0.09579792246222496,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "routing_query.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 1024
+        },
+        "routing_key.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 1024
+        },
+        "phase_encoder.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 256
+        },
+        "mode_gains": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 4
+        }
+      }
+    },
+    {
+      "protocol": "vector",
+      "seed": 47,
+      "initial_digest_matches_reconstruction": true,
+      "training_updates": 40,
+      "executed_support_steps": 1600,
+      "first_loss": 1.8969476222991943,
+      "last_loss": 1.799154281616211,
+      "evaluation_success": 0.25,
+      "retention_success": 0.2916666666666667,
+      "parameter_updates": {
+        "edge_weights": {
+          "l2_delta": 2.763190065857641,
+          "max_abs_delta": 0.11271294951438904,
+          "changed_elements": 4096,
+          "elements": 4096
+        },
+        "input_encoder.weight": {
+          "l2_delta": 1.1051771506702899,
+          "max_abs_delta": 0.10997681319713593,
+          "changed_elements": 384,
+          "elements": 384
+        },
+        "output_decoder.weight": {
+          "l2_delta": 0.6113324214933159,
+          "max_abs_delta": 0.13077124953269958,
+          "changed_elements": 224,
+          "elements": 224
+        },
+        "residual_gain": {
+          "l2_delta": 0.06561360508203506,
+          "max_abs_delta": 0.06561360508203506,
+          "changed_elements": 1,
+          "elements": 1,
+          "initial": 0.0,
+          "trained": -0.06561360508203506
+        },
+        "message_encoder.weight": {
+          "l2_delta": 1.6321574342300875,
+          "max_abs_delta": 0.09266452491283417,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "message_decoder.weight": {
+          "l2_delta": 1.6469230758075866,
+          "max_abs_delta": 0.09733952581882477,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "routing_query.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 1024
+        },
+        "routing_key.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 1024
+        },
+        "phase_encoder.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 256
+        },
+        "mode_gains": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 4
+        }
+      }
+    },
+    {
+      "protocol": "attention",
+      "seed": 47,
+      "initial_digest_matches_reconstruction": true,
+      "training_updates": 40,
+      "executed_support_steps": 1600,
+      "first_loss": 1.8969476222991943,
+      "last_loss": 1.7991544008255005,
+      "evaluation_success": 0.25,
+      "retention_success": 0.2916666666666667,
+      "parameter_updates": {
+        "edge_weights": {
+          "l2_delta": 2.7629167005512345,
+          "max_abs_delta": 0.11271372437477112,
+          "changed_elements": 4096,
+          "elements": 4096
+        },
+        "input_encoder.weight": {
+          "l2_delta": 1.1048710996107143,
+          "max_abs_delta": 0.10997937619686127,
+          "changed_elements": 384,
+          "elements": 384
+        },
+        "output_decoder.weight": {
+          "l2_delta": 0.611330973554205,
+          "max_abs_delta": 0.1307719349861145,
+          "changed_elements": 224,
+          "elements": 224
+        },
+        "residual_gain": {
+          "l2_delta": 0.06560302525758743,
+          "max_abs_delta": 0.06560302525758743,
+          "changed_elements": 1,
+          "elements": 1,
+          "initial": 0.0,
+          "trained": -0.06560302525758743
+        },
+        "message_encoder.weight": {
+          "l2_delta": 1.6307273874160173,
+          "max_abs_delta": 0.0925532728433609,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "message_decoder.weight": {
+          "l2_delta": 1.6468478355631515,
+          "max_abs_delta": 0.09736303985118866,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "routing_query.weight": {
+          "l2_delta": 0.29921426823915975,
+          "max_abs_delta": 0.027770355343818665,
+          "changed_elements": 1024,
+          "elements": 1024
+        },
+        "routing_key.weight": {
+          "l2_delta": 0.40188816138829825,
+          "max_abs_delta": 0.052265752106904984,
+          "changed_elements": 1024,
+          "elements": 1024
+        },
+        "phase_encoder.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 256
+        },
+        "mode_gains": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 4
+        }
+      }
+    },
+    {
+      "protocol": "phase",
+      "seed": 47,
+      "initial_digest_matches_reconstruction": true,
+      "training_updates": 40,
+      "executed_support_steps": 1600,
+      "first_loss": 1.8969476222991943,
+      "last_loss": 1.796712040901184,
+      "evaluation_success": 0.25,
+      "retention_success": 0.2916666666666667,
+      "parameter_updates": {
+        "edge_weights": {
+          "l2_delta": 2.560035054749522,
+          "max_abs_delta": 0.11085304617881775,
+          "changed_elements": 4096,
+          "elements": 4096
+        },
+        "input_encoder.weight": {
+          "l2_delta": 1.0972636225919794,
+          "max_abs_delta": 0.1095939427614212,
+          "changed_elements": 384,
+          "elements": 384
+        },
+        "output_decoder.weight": {
+          "l2_delta": 0.6040439566653202,
+          "max_abs_delta": 0.13054192066192627,
+          "changed_elements": 224,
+          "elements": 224
+        },
+        "residual_gain": {
+          "l2_delta": 0.05759270489215851,
+          "max_abs_delta": 0.05759270489215851,
+          "changed_elements": 1,
+          "elements": 1,
+          "initial": 0.0,
+          "trained": -0.05759270489215851
+        },
+        "message_encoder.weight": {
+          "l2_delta": 1.1739691294425156,
+          "max_abs_delta": 0.08743411302566528,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "message_decoder.weight": {
+          "l2_delta": 1.56124373413749,
+          "max_abs_delta": 0.08868043718393892,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "routing_query.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 1024
+        },
+        "routing_key.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 1024
+        },
+        "phase_encoder.weight": {
+          "l2_delta": 0.33894369951638065,
+          "max_abs_delta": 0.06385163962841034,
+          "changed_elements": 256,
+          "elements": 256
+        },
+        "mode_gains": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 4
+        }
+      }
+    },
+    {
+      "protocol": "modes",
+      "seed": 47,
+      "initial_digest_matches_reconstruction": true,
+      "training_updates": 40,
+      "executed_support_steps": 1600,
+      "first_loss": 1.8969476222991943,
+      "last_loss": 1.82550847530365,
+      "evaluation_success": 0.25,
+      "retention_success": 0.2916666666666667,
+      "parameter_updates": {
+        "edge_weights": {
+          "l2_delta": 3.562099949058207,
+          "max_abs_delta": 0.11727020144462585,
+          "changed_elements": 4096,
+          "elements": 4096
+        },
+        "input_encoder.weight": {
+          "l2_delta": 1.1568375366784707,
+          "max_abs_delta": 0.11076594889163971,
+          "changed_elements": 384,
+          "elements": 384
+        },
+        "output_decoder.weight": {
+          "l2_delta": 0.6329828847951808,
+          "max_abs_delta": 0.13315948843955994,
+          "changed_elements": 224,
+          "elements": 224
+        },
+        "residual_gain": {
+          "l2_delta": 0.08443715423345566,
+          "max_abs_delta": 0.08443715423345566,
+          "changed_elements": 1,
+          "elements": 1,
+          "initial": 0.0,
+          "trained": -0.08443715423345566
+        },
+        "message_encoder.weight": {
+          "l2_delta": 2.0062845704027934,
+          "max_abs_delta": 0.10552298277616501,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "message_decoder.weight": {
+          "l2_delta": 2.0491954118460094,
+          "max_abs_delta": 0.11409606039524078,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "routing_query.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 1024
+        },
+        "routing_key.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 1024
+        },
+        "phase_encoder.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 256
+        },
+        "mode_gains": {
+          "l2_delta": 0.13743698351086897,
+          "max_abs_delta": 0.08547627925872803,
+          "changed_elements": 4,
+          "elements": 4
+        }
+      }
+    },
+    {
+      "protocol": "wave",
+      "seed": 47,
+      "initial_digest_matches_reconstruction": true,
+      "training_updates": 40,
+      "executed_support_steps": 1600,
+      "first_loss": 1.8969476222991943,
+      "last_loss": 1.823237419128418,
+      "evaluation_success": 0.25,
+      "retention_success": 0.2916666666666667,
+      "parameter_updates": {
+        "edge_weights": {
+          "l2_delta": 3.323579775526556,
+          "max_abs_delta": 0.11619439721107483,
+          "changed_elements": 4096,
+          "elements": 4096
+        },
+        "input_encoder.weight": {
+          "l2_delta": 1.1466998277873877,
+          "max_abs_delta": 0.1105864942073822,
+          "changed_elements": 384,
+          "elements": 384
+        },
+        "output_decoder.weight": {
+          "l2_delta": 0.6300528164207047,
+          "max_abs_delta": 0.13287293910980225,
+          "changed_elements": 224,
+          "elements": 224
+        },
+        "residual_gain": {
+          "l2_delta": 0.07231410592794418,
+          "max_abs_delta": 0.07231410592794418,
+          "changed_elements": 1,
+          "elements": 1,
+          "initial": 0.0,
+          "trained": -0.07231410592794418
+        },
+        "message_encoder.weight": {
+          "l2_delta": 1.5619026203963402,
+          "max_abs_delta": 0.08824463188648224,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "message_decoder.weight": {
+          "l2_delta": 1.9408121990251763,
+          "max_abs_delta": 0.11270993947982788,
+          "changed_elements": 2048,
+          "elements": 2048
+        },
+        "routing_query.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 1024
+        },
+        "routing_key.weight": {
+          "l2_delta": 0.0,
+          "max_abs_delta": 0.0,
+          "changed_elements": 0,
+          "elements": 1024
+        },
+        "phase_encoder.weight": {
+          "l2_delta": 0.3918876211404327,
+          "max_abs_delta": 0.0746065191924572,
+          "changed_elements": 256,
+          "elements": 256
+        },
+        "mode_gains": {
+          "l2_delta": 0.0955885976078474,
+          "max_abs_delta": 0.06681323051452637,
+          "changed_elements": 4,
+          "elements": 4
+        }
+      }
+    }
+  ],
+  "paired_support_audit": [
+    {
+      "seed": 11,
+      "available_protocols": [
+        "scalar",
+        "scalar_matched",
+        "vector",
+        "attention",
+        "phase",
+        "modes",
+        "wave"
+      ],
+      "support_episode_count": 320,
+      "training_updates_equal": true,
+      "executed_support_steps_equal": true,
+      "evaluation_seeds_paired": true,
+      "retention_seeds_paired": true,
+      "support_query_overlap": 0,
+      "support_retention_overlap": 0
+    },
+    {
+      "seed": 29,
+      "available_protocols": [
+        "scalar",
+        "scalar_matched",
+        "vector",
+        "attention",
+        "phase",
+        "modes",
+        "wave"
+      ],
+      "support_episode_count": 320,
+      "training_updates_equal": true,
+      "executed_support_steps_equal": true,
+      "evaluation_seeds_paired": true,
+      "retention_seeds_paired": true,
+      "support_query_overlap": 0,
+      "support_retention_overlap": 0
+    },
+    {
+      "seed": 47,
+      "available_protocols": [
+        "scalar",
+        "scalar_matched",
+        "vector",
+        "attention",
+        "phase",
+        "modes",
+        "wave"
+      ],
+      "support_episode_count": 320,
+      "training_updates_equal": true,
+      "executed_support_steps_equal": true,
+      "evaluation_seeds_paired": true,
+      "retention_seeds_paired": true,
+      "support_query_overlap": 0,
+      "support_retention_overlap": 0
+    }
+  ],
+  "all_support_query_overlap": 0,
+  "all_support_retention_overlap": 0,
+  "all_query_retention_overlap": 0,
+  "unique_support_episode_seeds": 960,
+  "unique_query_episode_seeds": 72,
+  "unique_retention_episode_seeds": 72,
+  "source_snapshot_current_differences": [
+    {
+      "path": "aether/kernel/runtime.py",
+      "kind": "changed",
+      "diff": "--- snapshot/aether/kernel/runtime.py\n\n+++ current/aether/kernel/runtime.py\n\n@@ -235,7 +235,24 @@\n\n         Structural validation occurs before tensors are copied, so a checkpoint\n         cannot silently pair loaded routing buffers with a stale Python topology.\n+        Tensor shape, dtype and layout must match; implicit dtype casts are\n+        rejected. Failed loads preserve tensor values and parameter identities.\n         \"\"\"\n         c = self.config\n-        candidate = dict(self.state_dict())\n+        current = self.state_dict()\n+        supplied_keys, current_keys = set(state_dict), set(current)\n+        if strict and supplied_keys != current_keys:\n+            missing = sorted(current_keys - supplied_keys)\n+            unexpected = sorted(supplied_keys - current_keys)\n+            raise RuntimeError(f'checkpoint key mismatch: missing={missing}, unexpected={unexpected}')\n+        for name, value in state_dict.items():\n+            if not isinstance(value, torch.Tensor):\n+                raise TypeError(f'checkpoint value {name!r} must be a tensor')\n+            if name in current:\n+                expected_tensor = current[name]\n+                if value.shape != expected_tensor.shape:\n+                    raise RuntimeError(f'checkpoint shape mismatch for {name}')\n+                if value.dtype != expected_tensor.dtype or value.layout != expected_tensor.layout:\n+                    raise RuntimeError(f'checkpoint dtype/layout mismatch for {name}')\n+        candidate = dict(current)\n         candidate.update(state_dict)\n         graph_names = ('scalar_sources', 'scalar_targets', 'region_sources',\n@@ -273,5 +290,19 @@\n\n             if actual.shape != desired.shape or not torch.allclose(actual, desired, rtol=1e-6, atol=1e-7):\n                 raise ValueError(f'checkpoint has inconsistent derived buffer {name}')\n-        result = super().load_state_dict(state_dict, strict=strict, assign=assign)\n+        # Preflight covers ordinary PyTorch errors. Retain original objects and\n+        # values as a transactional fallback for load hooks or copy failures,\n+        # including assign=True, which can replace Parameter registrations.\n+        originals = [(name, value, value.detach().clone()) for name, value in\n+                     list(self.named_parameters(remove_duplicate=False))\n+                     + list(self.named_buffers(remove_duplicate=False))]\n+        try:\n+            result = super().load_state_dict(state_dict, strict=strict, assign=assign)\n+        except Exception:\n+            with torch.no_grad():\n+                for name, original, snapshot in originals:\n+                    path, _, leaf = name.rpartition('.')\n+                    setattr(self.get_submodule(path), leaf, original)\n+                    original.copy_(snapshot)\n+            raise\n         self.topology = topology\n         return result"
+    },
+    {
+      "path": "docs/research-status.md",
+      "kind": "changed",
+      "diff": "--- snapshot/docs/research-status.md\n\n+++ current/docs/research-status.md\n\n@@ -14,2 +14,18 @@\n\n \n The larger thirty-seed configuration is supplied for future exploration; it has not been executed as part of the first milestone. A confirmatory protocol should freeze task selection, compute-matched controls, power/precision choice and multiple-comparison treatment before collecting fresh data. The proposal's referenced papers and repository capabilities have not been independently audited in this build.\n+\n+## Executed 7 November 2026 pilot\n+\n+| Protocol | Mean query success | Mean longer-delay success |\n+| --- | --- | --- |\n+| Scalar | 16.7% | 20.8% |\n+| Scalar-matched | 20.8% | 20.8% |\n+| Vector | 20.8% | 20.8% |\n+| Attention | 20.8% | 20.8% |\n+| Phase | 20.8% | 20.8% |\n+| Modes | 16.7% | 20.8% |\n+| Wave | 16.7% | 20.8% |\n+\n+These are means over three paired training seeds, with 24 query episodes per seed and condition. Wave equaled scalar on every seed; it was 0.0417 below four simpler communication controls on the mean success metric. Its seed-level bootstrap interval versus scalar is [0,0] because all three observed paired differences are zero; that degenerate small-sample interval is not evidence of equivalence in the population. Zero gain, packet erasure, shuffled phases and randomized phases all left wave success unchanged in this pilot. Training loss decreased for all 21 models; decreasing loss did not establish useful wave communication.\n+\n+The raw run preserves its original source snapshot. Subsequent changes harden rejected-checkpoint loading and update documentation; they do not change the successful forward/training path. Final-code replay is audited separately in `reports/training-audit.json`."
+    },
+    {
+      "path": "docs/superpowers/plans/2026-11-07-neurowave.md",
+      "kind": "changed",
+      "diff": "--- snapshot/docs/superpowers/plans/2026-11-07-neurowave.md\n\n+++ current/docs/superpowers/plans/2026-11-07-neurowave.md\n\n@@ -33,7 +33,7 @@\n\n **Interfaces:** `NeuralPacket(sender_id, receiver_id, timestep, mode_count, payload, precision_bits, topology_version)` with payload shaped (modes, complex_dim, 2). `ChannelConfig`, `PacketBus` document their public constructors. `graph_modes(adjacency, mode_count, previous=None)` returns eigenvalues and orthonormal carriers.\n \n-- [ ] Write and run failing tests for packet validation, budgets, deterministic impairment/latency, and spectral orthogonality/alignment.\n-- [ ] Implement immutable validated packets, transactionally validated delivery, seeded disturbances, normalized Laplacian and stable eigenspace alignment.\n-- [ ] Run focused tests and report exact commands/results.\n+- [x] Write and run failing tests for packet validation, budgets, deterministic impairment/latency, and spectral orthogonality/alignment.\n+- [x] Implement immutable validated packets, transactionally validated delivery, seeded disturbances, normalized Laplacian and stable eigenspace alignment.\n+- [x] Run focused tests and report exact commands/results.\n \n ### Task 2: Trainable tensor runtime\n@@ -43,7 +43,7 @@\n\n **Interfaces:** `ModelConfig` is flat and serializable. `TissueModel(config, protocol, seed)`, `initial_state(batch_size)`, `step(observation, state, intervention='none', disturbance_seed=0)` returns logits/state; `forward(observations, intervention='none', disturbance_seed=0)` handles batch/time. `state_digest()` fingerprints parameters and persistent buffers. Topology exposes scalar_sources/targets and region_sources/targets. Protocol names: scalar, scalar_matched, vector, attention, phase, modes, wave. Observations have 12 features, actions 7.\n \n-- [ ] Write and run failing tests for exact zero-gain identity, finite gradients, topology counts, replay and frozen query parameters.\n-- [ ] Implement trainable sparse dynamics, graph carriers, phase gates, quantization, interventions and NumPy scalar reference.\n-- [ ] Compare PyTorch scalar step with independent NumPy calculations and run focused tests.\n+- [x] Write and run failing tests for exact zero-gain identity, finite gradients, topology counts, replay and frozen query parameters.\n+- [x] Implement trainable sparse dynamics, graph carriers, phase gates, quantization, interventions and NumPy scalar reference.\n+- [x] Compare PyTorch scalar step with independent NumPy calculations and run focused tests.\n \n ### Task 3: Evidence and receipts\n@@ -53,7 +53,7 @@\n\n **Interfaces:** `paired_summary(candidate, baseline, seed=0)` returns JSON-safe n/mean/ci95; `promotion_decision(...)` documents explicit gate arguments; receipts expose write/verify functions and deterministic SHA256 source/file fingerprints.\n \n-- [ ] Write and run failing tests for seed-level pairing, nonfinite inputs, insufficient samples, rejected resource/integrity gates, and modified-artifact detection.\n-- [ ] Implement bootstrap intervals, fail-closed promotion, append-preserving hashed receipts and safe verification paths.\n-- [ ] Run focused tests and report evidence.\n+- [x] Write and run failing tests for seed-level pairing, nonfinite inputs, insufficient samples, rejected resource/integrity gates, and modified-artifact detection.\n+- [x] Implement bootstrap intervals, fail-closed promotion, append-preserving hashed receipts and safe verification paths.\n+- [x] Run focused tests and report evidence.\n \n ### Task 4: Navigation, training and study CLI\n@@ -61,8 +61,8 @@\n\n **Files:** aether/environments/navigation.py; aether/experiments/study.py; aether/cli.py; aether/__main__.py; pyproject.toml; configs/*.json; tests/test_navigation.py; tests/test_study.py.\n \n-- [ ] Test cue disappearance, action effects, split seeds, successful expert rollouts, checkpoint replay and query immutability before implementation.\n-- [ ] Implement executed expert trajectories, AdamW imitation training, learned action evaluation, paired study loop and explicit scientific gates.\n-- [ ] Implement run, replay, verify, and serve commands with valid configuration checking and non-overwriting output directories.\n-- [ ] Run a bounded real pilot with all seven controls and recorded causal interventions.\n+- [x] Test cue disappearance, action effects, split seeds, successful expert rollouts, checkpoint replay and query immutability before implementation.\n+- [x] Implement executed expert trajectories, AdamW imitation training, learned action evaluation, paired study loop and explicit scientific gates.\n+- [x] Implement run, replay, verify, and serve commands with valid configuration checking and non-overwriting output directories.\n+- [x] Run a bounded real pilot with all seven controls and recorded causal interventions.\n \n ### Task 5: Observatory, review and documentation\n@@ -70,5 +70,6 @@\n\n **Files:** aether/observatory.py; README.md; docs/{architecture,research-status,roadmap}.md; reports/pilot/*.\n \n-- [ ] Build a readable static observatory from actual recorded outcomes and inspect its rendered UI.\n-- [ ] Document commands, architecture, implementation boundaries, source/API references and pilot limitations.\n-- [ ] Run full tests, package/CLI checks, exact replay and receipt verification; request independent code/scientific review and address material findings.\n+- [x] Build a readable static observatory from actual recorded outcomes and inspect its rendered UI.\n+- [x] Document commands, architecture, implementation boundaries, source/API references and pilot limitations.\n+- [x] Run full tests, package/CLI checks, exact replay and receipt verification; request independent code/scientific review and address material findings.\n+"
+    },
+    {
+      "path": "docs/superpowers/specs/2026-11-07-neurowave-design.md",
+      "kind": "changed",
+      "diff": "--- snapshot/docs/superpowers/specs/2026-11-07-neurowave-design.md\n\n+++ current/docs/superpowers/specs/2026-11-07-neurowave-design.md\n\n@@ -13,5 +13,5 @@\n\n Protocols are scalar-only, vector, attention, phase-only, mode-only, and combined wave. The five auxiliary protocols use the same dense encoder/decoder parameter shapes and transmitted tensor shape. A learned scalar bottleneck control is added. Report actual parameters, wire payload, and measured time; equal training examples do not establish equal compute.\n \n-The packet simulator validates immutable payloads, sender authority, recipient identity, topology versions, precision, shape, finite values, tick order, and per-tick payload budgets. It supports independently seeded loss, noise, cross-talk, latency, phase disruptions and congestion. Training uses a differentiable tensor transport with matching quantization and deterministic impairments; the CLI checks conformance to the packet reference route before running experiments. Headers and queue memory are excluded from payload counts and identified as such.\n+The packet simulator validates immutable payloads, sender authority, recipient identity, topology versions, precision, shape, finite values, tick order, and per-tick payload budgets. It supports independently seeded loss, noise, cross-talk, latency, phase disruptions and congestion. Training uses a differentiable clean tensor transport with matching quantization; the CLI checks clean transport conformance against the packet reference route before running experiments. Impairments are separately tested reference capabilities. Headers and queue memory are excluded from payload counts and identified as such.\n \n The symmetric normalized graph Laplacian supplies routing carriers while directed links retain direction. Sign canonicalization and alignment inside equal-eigenvalue subspaces preserve orthogonality and eigenvector validity. Topology changes require rebuilding all derived buffers; growth is disabled in this milestone."
+    },
+    {
+      "path": "tests/test_runtime.py",
+      "kind": "changed",
+      "diff": "--- snapshot/tests/test_runtime.py\n\n+++ current/tests/test_runtime.py\n\n@@ -241,2 +241,37 @@\n\n     with pytest.raises(ValueError):\n         restored.load_state_dict(corrupted)\n+\n+\n+@pytest.mark.parametrize('assign', [False, True])\n+def test_failed_checkpoint_load_preserves_tensors_and_authoritative_topology(assign):\n+    _, Model = api()\n+    source = Model(small(), 'wave', 11)\n+    restored = Model(small(), 'wave', 21)\n+    before = restored.state_digest()\n+    topology = restored.topology\n+    malformed = {name: value.clone() for name, value in source.state_dict().items()}\n+    malformed['output_decoder.weight'] = malformed['output_decoder.weight'][:1]\n+    with pytest.raises(RuntimeError):\n+        restored.load_state_dict(malformed, assign=assign)\n+    assert restored.state_digest() == before\n+    assert restored.topology is topology\n+\n+\n+@pytest.mark.parametrize('corruption', ['missing', 'unexpected', 'non_tensor', 'dtype'])\n+def test_checkpoint_preflight_rejects_malformed_mapping_without_mutation(corruption):\n+    _, Model = api()\n+    source = Model(small(), 'wave', 11)\n+    restored = Model(small(), 'wave', 21)\n+    before = restored.state_digest()\n+    malformed = {name: value.clone() for name, value in source.state_dict().items()}\n+    if corruption == 'missing':\n+        del malformed['output_decoder.weight']\n+    elif corruption == 'unexpected':\n+        malformed['unknown_tensor'] = torch.ones(1)\n+    elif corruption == 'non_tensor':\n+        malformed['output_decoder.weight'] = 'invalid'\n+    else:\n+        malformed['output_decoder.weight'] = malformed['output_decoder.weight'].double()\n+    with pytest.raises((RuntimeError, TypeError)):\n+        restored.load_state_dict(malformed)\n+    assert restored.state_digest() == before"
+    },
+    {
+      "path": "README.md",
+      "kind": "changed",
+      "diff": "--- snapshot/README.md\n\n+++ current/README.md\n\n@@ -15,8 +15,14 @@\n\n python -m aether verify runs/pilot/receipt.json\n python -m aether replay runs/pilot/checkpoints/wave-11.pt\n-python -m aether serve runs/pilot --port 8765\n+python -m aether serve runs/pilot --port 8789\n ```\n \n-Open [the local observatory](http://127.0.0.1:8765). Run outputs are never overwritten; choose a new output directory for another study. `Ctrl+C` stops the server. The HTML report can also be opened directly from disk.\n+Open [the local observatory](http://127.0.0.1:8789). Run outputs are never overwritten; choose a new output directory for another study. `Ctrl+C` stops the server. The HTML report can also be opened directly from disk. Port 8789 avoids the existing SYNAPSE workbench on 8765 on this machine.\n+\n+## Completed pilot\n+\n+The first study is preserved in [reports/pilot-2026-11-07](reports/pilot-2026-11-07/index.html): **21 trained models** (seven protocols \u00d7 three seeds), 40 updates/model, all evaluation conditions replayed locally, and **26 receipt-covered artifacts**. The final code passes **169 tests**.\n+\n+Wave and scalar each averaged **16.7%** query success. Scalar-matched, vector, attention and phase each averaged **20.8%**; modes averaged **16.7%**. Wave interventions did not improve success. This pilot does **not** demonstrate useful wave communication or a performance advantage. Promotion is withheld; the small sample and unestablished compute equivalence independently prevent promotion.\n \n `configs/pilot.json` requests three independent training seeds, seven protocols, forty AdamW updates per model and twenty-four executed query episodes per seed. `configs/study-30.json` defines a larger, **unexecuted** thirty-seed study. Changing training length, learning rate, seeds or task difficulty after inspecting results is exploration and must be reported as such."
+    }
+  ],
+  "schema": "aether.training_audit.v1",
+  "audited_at_utc": "2026-11-07T08:16:53.528079+00:00",
+  "method": "Read existing JSON and CPU weights_only checkpoints; reconstruct same-seed initialization; exact current-runtime checkpoint replay. No retraining or new evaluation conditions.",
+  "raw_run_directory": "reports/pilot-2026-11-07",
+  "raw_run_artifacts_modified": false,
+  "all_current_runtime_replays_valid": true,
+  "replay_audits": [
+    {
+      "protocol": "scalar",
+      "seed": 11,
+      "valid": true,
+      "state_digest_matches_record": true
+    },
+    {
+      "protocol": "scalar_matched",
+      "seed": 11,
+      "valid": true,
+      "state_digest_matches_record": true
+    },
+    {
+      "protocol": "vector",
+      "seed": 11,
+      "valid": true,
+      "state_digest_matches_record": true
+    },
+    {
+      "protocol": "attention",
+      "seed": 11,
+      "valid": true,
+      "state_digest_matches_record": true
+    },
+    {
+      "protocol": "phase",
+      "seed": 11,
+      "valid": true,
+      "state_digest_matches_record": true
+    },
+    {
+      "protocol": "modes",
+      "seed": 11,
+      "valid": true,
+      "state_digest_matches_record": true
+    },
+    {
+      "protocol": "wave",
+      "seed": 11,
+      "valid": true,
+      "state_digest_matches_record": true
+    },
+    {
+      "protocol": "scalar",
+      "seed": 29,
+      "valid": true,
+      "state_digest_matches_record": true
+    },
+    {
+      "protocol": "scalar_matched",
+      "seed": 29,
+      "valid": true,
+      "state_digest_matches_record": true
+    },
+    {
+      "protocol": "vector",
+      "seed": 29,
+      "valid": true,
+      "state_digest_matches_record": true
+    },
+    {
+      "protocol": "attention",
+      "seed": 29,
+      "valid": true,
+      "state_digest_matches_record": true
+    },
+    {
+      "protocol": "phase",
+      "seed": 29,
+      "valid": true,
+      "state_digest_matches_record": true
+    },
+    {
+      "protocol": "modes",
+      "seed": 29,
+      "valid": true,
+      "state_digest_matches_record": true
+    },
+    {
+      "protocol": "wave",
+      "seed": 29,
+      "valid": true,
+      "state_digest_matches_record": true
+    },
+    {
+      "protocol": "scalar",
+      "seed": 47,
+      "valid": true,
+      "state_digest_matches_record": true
+    },
+    {
+      "protocol": "scalar_matched",
+      "seed": 47,
+      "valid": true,
+      "state_digest_matches_record": true
+    },
+    {
+      "protocol": "vector",
+      "seed": 47,
+      "valid": true,
+      "state_digest_matches_record": true
+    },
+    {
+      "protocol": "attention",
+      "seed": 47,
+      "valid": true,
+      "state_digest_matches_record": true
+    },
+    {
+      "protocol": "phase",
+      "seed": 47,
+      "valid": true,
+      "state_digest_matches_record": true
+    },
+    {
+      "protocol": "modes",
+      "seed": 47,
+      "valid": true,
+      "state_digest_matches_record": true
+    },
+    {
+      "protocol": "wave",
+      "seed": 47,
+      "valid": true,
+      "state_digest_matches_record": true
+    }
+  ],
+  "wave_policy_intervention_audits": [
+    {
+      "seed": 11,
+      "intervention": "zero_gain",
+      "episode_count": 24,
+      "changed_action_sequences": 0,
+      "changed_final_positions": 0,
+      "changed_success_outcomes": 0,
+      "intact_success_rate": 0.25,
+      "intervention_success_rate": 0.25,
+      "mean_return_difference": 0.0,
+      "changed_waiting_tick_actions": 0,
+      "changed_movement_enabled_tick_actions": 0,
+      "episodes_with_changed_movement_enabled_actions": 0
+    },
+    {
+      "seed": 11,
+      "intervention": "erase_packets",
+      "episode_count": 24,
+      "changed_action_sequences": 0,
+      "changed_final_positions": 0,
+      "changed_success_outcomes": 0,
+      "intact_success_rate": 0.25,
+      "intervention_success_rate": 0.25,
+      "mean_return_difference": 0.0,
+      "changed_waiting_tick_actions": 0,
+      "changed_movement_enabled_tick_actions": 0,
+      "episodes_with_changed_movement_enabled_actions": 0
+    },
+    {
+      "seed": 11,
+      "intervention": "shuffle_phase",
+      "episode_count": 24,
+      "changed_action_sequences": 0,
+      "changed_final_positions": 0,
+      "changed_success_outcomes": 0,
+      "intact_success_rate": 0.25,
+      "intervention_success_rate": 0.25,
+      "mean_return_difference": 0.0,
+      "changed_waiting_tick_actions": 0,
+      "changed_movement_enabled_tick_actions": 0,
+      "episodes_with_changed_movement_enabled_actions": 0
+    },
+    {
+      "seed": 11,
+      "intervention": "random_phase",
+      "episode_count": 24,
+      "changed_action_sequences": 0,
+      "changed_final_positions": 0,
+      "changed_success_outcomes": 0,
+      "intact_success_rate": 0.25,
+      "intervention_success_rate": 0.25,
+      "mean_return_difference": 0.0,
+      "changed_waiting_tick_actions": 0,
+      "changed_movement_enabled_tick_actions": 0,
+      "episodes_with_changed_movement_enabled_actions": 0
+    },
+    {
+      "seed": 29,
+      "intervention": "zero_gain",
+      "episode_count": 24,
+      "changed_action_sequences": 0,
+      "changed_final_positions": 0,
+      "changed_success_outcomes": 0,
+      "intact_success_rate": 0.0,
+      "intervention_success_rate": 0.0,
+      "mean_return_difference": 0.0,
+      "changed_waiting_tick_actions": 0,
+      "changed_movement_enabled_tick_actions": 0,
+      "episodes_with_changed_movement_enabled_actions": 0
+    },
+    {
+      "seed": 29,
+      "intervention": "erase_packets",
+      "episode_count": 24,
+      "changed_action_sequences": 0,
+      "changed_final_positions": 0,
+      "changed_success_outcomes": 0,
+      "intact_success_rate": 0.0,
+      "intervention_success_rate": 0.0,
+      "mean_return_difference": 0.0,
+      "changed_waiting_tick_actions": 0,
+      "changed_movement_enabled_tick_actions": 0,
+      "episodes_with_changed_movement_enabled_actions": 0
+    },
+    {
+      "seed": 29,
+      "intervention": "shuffle_phase",
+      "episode_count": 24,
+      "changed_action_sequences": 0,
+      "changed_final_positions": 0,
+      "changed_success_outcomes": 0,
+      "intact_success_rate": 0.0,
+      "intervention_success_rate": 0.0,
+      "mean_return_difference": 0.0,
+      "changed_waiting_tick_actions": 0,
+      "changed_movement_enabled_tick_actions": 0,
+      "episodes_with_changed_movement_enabled_actions": 0
+    },
+    {
+      "seed": 29,
+      "intervention": "random_phase",
+      "episode_count": 24,
+      "changed_action_sequences": 0,
+      "changed_final_positions": 0,
+      "changed_success_outcomes": 0,
+      "intact_success_rate": 0.0,
+      "intervention_success_rate": 0.0,
+      "mean_return_difference": 0.0,
+      "changed_waiting_tick_actions": 0,
+      "changed_movement_enabled_tick_actions": 0,
+      "episodes_with_changed_movement_enabled_actions": 0
+    },
+    {
+      "seed": 47,
+      "intervention": "zero_gain",
+      "episode_count": 24,
+      "changed_action_sequences": 24,
+      "changed_final_positions": 0,
+      "changed_success_outcomes": 0,
+      "intact_success_rate": 0.25,
+      "intervention_success_rate": 0.25,
+      "mean_return_difference": 0.0,
+      "changed_waiting_tick_actions": 24,
+      "changed_movement_enabled_tick_actions": 0,
+      "episodes_with_changed_movement_enabled_actions": 0
+    },
+    {
+      "seed": 47,
+      "intervention": "erase_packets",
+      "episode_count": 24,
+      "changed_action_sequences": 24,
+      "changed_final_positions": 0,
+      "changed_success_outcomes": 0,
+      "intact_success_rate": 0.25,
+      "intervention_success_rate": 0.25,
+      "mean_return_difference": 0.0,
+      "changed_waiting_tick_actions": 24,
+      "changed_movement_enabled_tick_actions": 0,
+      "episodes_with_changed_movement_enabled_actions": 0
+    },
+    {
+      "seed": 47,
+      "intervention": "shuffle_phase",
+      "episode_count": 24,
+      "changed_action_sequences": 3,
+      "changed_final_positions": 0,
+      "changed_success_outcomes": 0,
+      "intact_success_rate": 0.25,
+      "intervention_success_rate": 0.25,
+      "mean_return_difference": 0.0,
+      "changed_waiting_tick_actions": 3,
+      "changed_movement_enabled_tick_actions": 0,
+      "episodes_with_changed_movement_enabled_actions": 0
+    },
+    {
+      "seed": 47,
+      "intervention": "random_phase",
+      "episode_count": 24,
+      "changed_action_sequences": 24,
+      "changed_final_positions": 0,
+      "changed_success_outcomes": 0,
+      "intact_success_rate": 0.25,
+      "intervention_success_rate": 0.25,
+      "mean_return_difference": 0.0,
+      "changed_waiting_tick_actions": 24,
+      "changed_movement_enabled_tick_actions": 0,
+      "episodes_with_changed_movement_enabled_actions": 0
+    }
+  ],
+  "snapshot_reconstructed_source_fingerprint": "35ad4e2ca01905c18457f25ff0229fb862ca5d562cdd443d66b696f6ce789244",
+  "recorded_source_fingerprint": "35ad4e2ca01905c18457f25ff0229fb862ca5d562cdd443d66b696f6ce789244",
+  "snapshot_matches_recorded_fingerprint": true,
+  "current_source_fingerprint_at_audit": "9e79f08084675eceb08766f20e0622286f1b129282a24dc256513115dc547e13",
+  "snapshot_zip_sha256": "c62a1a4a70c0479ec20b5c272ec3199980b132e16694a97dbc73a9101ff26e51",
+  "results_json_sha256": "c810faf9a5cc3825e1a0691bb16c1d036b15ec47b4b71cc5b551dfc7da4164b4",
+  "source_difference_interpretation": "Saved snapshot generated the pilot. Current runtime differs only in rejected-checkpoint-load preflight/rollback; regression tests and documentation were subsequently updated. Forward/training/init numerical paths remain unchanged in observed diff.",
+  "task_scope": {
+    "fixed_goal_tasks": 6,
+    "distinct_seed_ids_do_not_imply_distinct_tasks": true,
+    "held_out_geometries": false,
+    "goal_directions": "positive/negative x, y, z; fixed distance 2 from origin",
+    "counts_by_seed": [
+      {
+        "training_seed": 11,
+        "goal_direction_counts": {
+          "support": {
+            "0": 39,
+            "1": 46,
+            "2": 53,
+            "3": 79,
+            "4": 58,
+            "5": 45
+          },
+          "evaluation": {
+            "0": 4,
+            "1": 6,
+            "2": 5,
+            "3": 6,
+            "4": 2,
+            "5": 1
+          },
+          "retention": {
+            "0": 9,
+            "1": 1,
+            "2": 6,
+            "3": 4,
+            "4": 3,
+            "5": 1
+          }
+        }
+      },
+      {
+        "training_seed": 29,
+        "goal_direction_counts": {
+          "support": {
+            "0": 53,
+            "1": 66,
+            "2": 44,
+            "3": 45,
+            "4": 54,
+            "5": 58
+          },
+          "evaluation": {
+            "0": 4,
+            "1": 6,
+            "2": 3,
+            "3": 4,
+            "4": 4,
+            "5": 3
+          },
+          "retention": {
+            "0": 4,
+            "1": 5,
+            "2": 5,
+            "3": 3,
+            "4": 3,
+            "5": 4
+          }
+        }
+      },
+      {
+        "training_seed": 47,
+        "goal_direction_counts": {
+          "support": {
+            "0": 44,
+            "1": 51,
+            "2": 51,
+            "3": 59,
+            "4": 62,
+            "5": 53
+          },
+          "evaluation": {
+            "0": 4,
+            "1": 4,
+            "2": 4,
+            "3": 3,
+            "4": 6,
+            "5": 3
+          },
+          "retention": {
+            "0": 3,
+            "1": 4,
+            "2": 4,
+            "3": 3,
+            "4": 7,
+            "5": 3
+          }
+        }
+      }
+    ]
+  },
+  "outcomes": {
+    "scalar": {
+      "mean_success": 0.16666666666666666,
+      "mean_retention_success": 0.20833333333333334,
+      "parameter_count": 22183,
+      "mean_train_seconds": 6.95857140000832
+    },
+    "scalar_matched": {
+      "mean_success": 0.20833333333333334,
+      "mean_retention_success": 0.20833333333333334,
+      "parameter_count": 28660,
+      "mean_train_seconds": 9.26969860001312
+    },
+    "vector": {
+      "mean_success": 0.20833333333333334,
+      "mean_retention_success": 0.20833333333333334,
+      "parameter_count": 28660,
+      "mean_train_seconds": 8.818176533347772
+    },
+    "attention": {
+      "mean_success": 0.20833333333333334,
+      "mean_retention_success": 0.20833333333333334,
+      "parameter_count": 28660,
+      "mean_train_seconds": 12.921210833340107
+    },
+    "phase": {
+      "mean_success": 0.20833333333333334,
+      "mean_retention_success": 0.20833333333333334,
+      "parameter_count": 28660,
+      "mean_train_seconds": 11.246160166667929
+    },
+    "modes": {
+      "mean_success": 0.16666666666666666,
+      "mean_retention_success": 0.20833333333333334,
+      "parameter_count": 28660,
+      "mean_train_seconds": 9.32181490001191
+    },
+    "wave": {
+      "mean_success": 0.16666666666666666,
+      "mean_retention_success": 0.20833333333333334,
+      "parameter_count": 28660,
+      "mean_train_seconds": 10.956054233344426
+    }
+  },
+  "promotion": {
+    "promoted": false,
+    "status": "inconclusive",
+    "reasons": [
+      "scalar: lower paired confidence bound is not positive",
+      "scalar_matched: lower paired confidence bound is not positive",
+      "vector: lower paired confidence bound is not positive",
+      "attention: lower paired confidence bound is not positive",
+      "phase: lower paired confidence bound is not positive",
+      "modes: lower paired confidence bound is not positive",
+      "insufficient independent training seeds: 3 < 30",
+      "resources_comparable: not established as true"
+    ],
+    "comparisons": {
+      "scalar": {
+        "n": 3,
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ]
+      },
+      "scalar_matched": {
+        "n": 3,
+        "mean": -0.041666666666666664,
+        "ci95": [
+          -0.125,
+          0.0
+        ]
+      },
+      "vector": {
+        "n": 3,
+        "mean": -0.041666666666666664,
+        "ci95": [
+          -0.125,
+          0.0
+        ]
+      },
+      "attention": {
+        "n": 3,
+        "mean": -0.041666666666666664,
+        "ci95": [
+          -0.125,
+          0.0
+        ]
+      },
+      "phase": {
+        "n": 3,
+        "mean": -0.041666666666666664,
+        "ci95": [
+          -0.125,
+          0.0
+        ]
+      },
+      "modes": {
+        "n": 3,
+        "mean": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "retention": {
+      "n": 3,
+      "mean": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "retention_margin": 0.05,
+    "min_confirmatory_seeds": 30,
+    "inference_unit": "independent_training_seed"
+  },
+  "scientific_findings": [
+    "No demonstrated wave performance advantage; wave and scalar mean success are 1/6 (16.67%). Four auxiliary controls average 5/24 (20.83%).",
+    "Three independent training seeds are exploratory and below the predeclared 30-seed confirmation threshold.",
+    "All auxiliary residual gains moved from exact zero and all message encoder/decoder weights changed. Parameter changes establish optimization activity, not a useful communication advantage.",
+    "Wave interventions changed 75/288 paired action sequences, exclusively during movement-locked waiting ticks in seed47. No movement-enabled actions, final positions, success outcomes or mean returns changed across the recorded interventions. Optimized communication did not affect evaluated task behavior.",
+    "Unused protocol-specific parameter tensors remain unchanged outside their relevant arms, consistent with the declared routing computations.",
+    "All seven arms use paired support/query seeds, 40 updates, 320 support episodes and 1600 executed support steps per seed; support, query and retention seed IDs are disjoint.",
+    "Distinct query seeds resample the same six fixed direction goals; there is no evidence of transfer to held-out geometries or broad navigation competence.",
+    "Longer-delay retention is a proxy, not a sequential catastrophic-forgetting experiment.",
+    "Examples are matched, but scalar and auxiliary parameter/payload budgets differ and measured compute equivalence is not established.",
+    "Training and this replay use clean tensor transport. Reference impairment tests do not establish trained robustness to those impairments.",
+    "An unsigned receipt detects changed artifacts but is not cryptographic proof of authorship or authenticity."
+  ]
+}

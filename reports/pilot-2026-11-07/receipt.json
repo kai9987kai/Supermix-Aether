@@ -1,0 +1,158 @@
+{
+  "environment": {
+    "numpy": "2.4.3",
+    "platform": "Windows-11-10.0.28120-SP0",
+    "python": "3.12.10",
+    "scipy": "1.17.1",
+    "torch": "2.11.0+cpu",
+    "torch_threads": 1
+  },
+  "files": [
+    {
+      "path": "checkpoints/attention-11.pt",
+      "sha256": "8440e06641561c9c1021e917b7d35b705e6bbffe91b0f41839b691ea42d0f370",
+      "size_bytes": 238973
+    },
+    {
+      "path": "checkpoints/attention-29.pt",
+      "sha256": "f65138c47378aa3357d15c67e2d7ed0ba4b9febdc0c1ebc69aae5bcd2893f840",
+      "size_bytes": 238973
+    },
+    {
+      "path": "checkpoints/attention-47.pt",
+      "sha256": "806b6a3ed5a05f5a791559ca93675400f94635f4e9e49259b3bef485e23d499c",
+      "size_bytes": 238781
+    },
+    {
+      "path": "checkpoints/modes-11.pt",
+      "sha256": "cab09711359acd72f21fa555508f0eb1b87ec906c464898328a71426c8ed952d",
+      "size_bytes": 238765
+    },
+    {
+      "path": "checkpoints/modes-29.pt",
+      "sha256": "da7e5bc2605b0c508a9934a70bd62709ead6737e6fd3a9b4adbb8b4946ecbb3f",
+      "size_bytes": 238893
+    },
+    {
+      "path": "checkpoints/modes-47.pt",
+      "sha256": "64f5dc7491948c6f768cfd3e19cdf84253c9c755fd8979811c843bf290256ac5",
+      "size_bytes": 238637
+    },
+    {
+      "path": "checkpoints/phase-11.pt",
+      "sha256": "2bb1ac5219deebf63b803dfd72ff42d03241351d631ec5bd30133abba6a20d0c",
+      "size_bytes": 238765
+    },
+    {
+      "path": "checkpoints/phase-29.pt",
+      "sha256": "50adec7624ab4db6cfe947ee8dbe4efc9057fd994a37a7011d85ffa5ab6a2d80",
+      "size_bytes": 238829
+    },
+    {
+      "path": "checkpoints/phase-47.pt",
+      "sha256": "e0d1be8b5bde77f0a797084b1b92e557b0b4b7ee851cb96f414a6fefef729983",
+      "size_bytes": 238637
+    },
+    {
+      "path": "checkpoints/scalar-11.pt",
+      "sha256": "050360271b53b2f5211fcfb0c2aaf8211aaf7b8c9ce5dfd8dd89477692f44290",
+      "size_bytes": 209562
+    },
+    {
+      "path": "checkpoints/scalar-29.pt",
+      "sha256": "390aeaad93e3a43733dbb33916c568e13c09f81a64c2389e8fdafb3942fbba52",
+      "size_bytes": 209690
+    },
+    {
+      "path": "checkpoints/scalar-47.pt",
+      "sha256": "56cb0a17b772be44c16f59381da8a972e44750850da342099d8ba4941a7b63e4",
+      "size_bytes": 209434
+    },
+    {
+      "path": "checkpoints/scalar_matched-11.pt",
+      "sha256": "c31659613cb8dcec6711249f3bcd19e26421fe65ef6e620139583e9402b55111",
+      "size_bytes": 239153
+    },
+    {
+      "path": "checkpoints/scalar_matched-29.pt",
+      "sha256": "534ce8a106aa42cc6c5a109eb859c868e6e7bcc308d24cf7583097ffae73c7e5",
+      "size_bytes": 239217
+    },
+    {
+      "path": "checkpoints/scalar_matched-47.pt",
+      "sha256": "cf74ccfed9b40a216e39212e3b6bcdb2981c045ee6c29dc4132b57325789fa3f",
+      "size_bytes": 238961
+    },
+    {
+      "path": "checkpoints/vector-11.pt",
+      "sha256": "fe82a1494512a26db2ea53f516f772d212a7b77f6184e533175463af4daf8a2e",
+      "size_bytes": 238801
+    },
+    {
+      "path": "checkpoints/vector-29.pt",
+      "sha256": "0dc464c9ff5d153c8b160fa5d25edc167d999a47757c5cbd600499eace1db777",
+      "size_bytes": 238865
+    },
+    {
+      "path": "checkpoints/vector-47.pt",
+      "sha256": "7da165c710c86ab0275a163a1e6d221fe58fa429f57b1d1fdcb68ed6bbd56e9a",
+      "size_bytes": 238673
+    },
+    {
+      "path": "checkpoints/wave-11.pt",
+      "sha256": "013fddaf8a6741159c2f4d0ca9f772a3342303e62c49d3eab9dfcee39973dca0",
+      "size_bytes": 247433
+    },
+    {
+      "path": "checkpoints/wave-29.pt",
+      "sha256": "3ae6e65e80b3c8b36c573061a7d84aefe4f24a5aa1596c523b24a002b7a22428",
+      "size_bytes": 248009
+    },
+    {
+      "path": "checkpoints/wave-47.pt",
+      "sha256": "11babfa0d2f115495dee1cb5134f3817dc43ee3adf07d94bfdebd03a3c974d06",
+      "size_bytes": 246921
+    },
+    {
+      "path": "config.json",
+      "sha256": "713b9be10322d1df8a8b2c2da349f813a7bd861d73d6e2aee6824b9799fd3d53",
+      "size_bytes": 416
+    },
+    {
+      "path": "index.html",
+      "sha256": "a8d09e492e4a92ec3832578c15c285172be78ef2dc4b177bcd4d8a0200cc5bb8",
+      "size_bytes": 13351
+    },
+    {
+      "path": "partial-results.json",
+      "sha256": "b34170ba96396213fea46235549ebc91cb6a83addcdac6c6354b4691703faf1a",
+      "size_bytes": 779715
+    },
+    {
+      "path": "results.json",
+      "sha256": "c810faf9a5cc3825e1a0691bb16c1d036b15ec47b4b71cc5b551dfc7da4164b4",
+      "size_bytes": 784788
+    },
+    {
+      "path": "source-snapshot.zip",
+      "sha256": "c62a1a4a70c0479ec20b5c272ec3199980b132e16694a97dbc73a9101ff26e51",
+      "size_bytes": 61446
+    }
+  ],
+  "hash_algorithm": "sha256",
+  "metadata": {
+    "environment": {
+      "numpy": "2.4.3",
+      "platform": "Windows-11-10.0.28120-SP0",
+      "python": "3.12.10",
+      "scipy": "1.17.1",
+      "torch": "2.11.0+cpu",
+      "torch_threads": 1
+    },
+    "reproducibility_scope": "exact local replay on recorded software and hardware",
+    "source_fingerprint": "35ad4e2ca01905c18457f25ff0229fb862ca5d562cdd443d66b696f6ce789244"
+  },
+  "schema_version": 1,
+  "scope": "change detection only; unsigned and not proof of authenticity",
+  "source_fingerprint": "35ad4e2ca01905c18457f25ff0229fb862ca5d562cdd443d66b696f6ce789244"
+}

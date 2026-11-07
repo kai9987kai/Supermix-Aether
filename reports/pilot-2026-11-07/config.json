@@ -1,0 +1,26 @@
+{
+  "seeds": [
+    11,
+    29,
+    47
+  ],
+  "protocols": [
+    "scalar",
+    "scalar_matched",
+    "vector",
+    "attention",
+    "phase",
+    "modes",
+    "wave"
+  ],
+  "updates": 40,
+  "batch_size": 8,
+  "evaluation_episodes": 24,
+  "learning_rate": 0.003,
+  "delay": 3,
+  "horizon": 9,
+  "retention_delay": 5,
+  "retention_margin": 0.05,
+  "min_confirmatory_seeds": 30,
+  "model": {}
+}
